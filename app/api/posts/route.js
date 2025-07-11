@@ -5,7 +5,7 @@ import { createPostSchema } from "@/lib/validation/posts";
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const limit = Number.parseInt(searchParams.get("limit") || "25");
+    const limit = Number.parseInt(searchParams.get("limit") || "10");
     const offset = Number.parseInt(searchParams.get("offset") || "0");
     const userId = searchParams.get("user_id");
     const categoryId = searchParams.get("category_id");

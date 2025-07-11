@@ -56,7 +56,6 @@ export default function CategoryPanel() {
 
     return (
         <div className="space-y-6">
-            {/* Trending Topics Card */}
             <Card className="bg-gradient-to-br from-gray-900 to-gray-800 border-none shadow-lg">
                 <CardHeader className="pb-3">
                     <div className="flex items-center gap-3">
@@ -99,7 +98,6 @@ export default function CategoryPanel() {
                 </CardContent>
             </Card>
 
-            {/* Categories Card */}
             <Card className="bg-gradient-to-br from-gray-900 to-gray-800 border-none shadow-lg">
                 <CardHeader className="pb-3">
                     <div className="flex items-center gap-3">
@@ -134,37 +132,6 @@ export default function CategoryPanel() {
                             </motion.div>
                         ))}
                     </div>
-                </CardContent>
-            </Card>
-
-            {/* Statistics Card */}
-            <Card className="bg-gradient-to-br from-gray-900 to-gray-800 border-none shadow-lg">
-                <CardHeader className="pb-3">
-                    <div className="flex items-center gap-3">
-                        <ChartBar className="w-6 h-6 text-blue-400" />
-                        <h3 className="font-bold text-lg text-white tracking-tight">
-                            Statistik
-                        </h3>
-                    </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                    {stats.map((stat, index) => (
-                        <motion.div
-                            key={index}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.3, delay: index * 0.1 }}
-                            className="flex justify-between items-center p-2 rounded-lg hover:bg-gray-700/50 transition-colors duration-300"
-                        >
-                            <div className="flex items-center gap-2">
-                                <span className="text-blue-400">{stat.icon}</span>
-                                <span className="text-sm text-gray-300">{stat.label}</span>
-                            </div>
-                            <span className="font-semibold text-white text-sm">
-                                {stat.value.toLocaleString()}
-                            </span>
-                        </motion.div>
-                    ))}
                 </CardContent>
             </Card>
         </div>

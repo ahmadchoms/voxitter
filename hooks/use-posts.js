@@ -6,52 +6,62 @@ import { useSession } from "next-auth/react";
 
 export function usePosts() {
   const { data: session } = useSession();
+  const userId = session?.user?.id;
+
   const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [hasMore, setHasMore] = useState(true);
   const [offset, setOffset] = useState(0);
-  const userId = session?.user?.id
+  const [initialLoading, setInitialLoading] = useState(false);
+  const limit = 10;
 
-  const fetchPosts = useCallback(async (currentOffset = 0, append = false) => {
-    try {
-      setLoading(true);
-      const result = await postsService.getPosts(currentOffset, 25, userId);
+  const fetchPosts = useCallback(
+    async (currentOffset = 0, append = false) => {
+      if (!userId) return;
 
-      if (result.error) {
-        throw new Error(result.error);
+      if (currentOffset === 0 && !append) {
+        setInitialLoading(true);
       }
 
-      const newPosts = result.data || [];
+      try {
+        setLoading(true);
 
-      if (newPosts.length < 25) {
-        setHasMore(false);
+        const res = await fetch(
+          `/api/posts?offset=${currentOffset}&limit=${limit}`
+        );
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || "Gagal mengambil data post");
+        }
+
+        const newPosts = data || [];
+
+        setPosts((prev) => (append ? [...prev, ...newPosts] : newPosts));
+        setHasMore(newPosts.length === limit);
+        setError(null);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+        setInitialLoading(false);
       }
+    },
+    [userId]
+  );
 
-      setPosts((prev) => (append ? [...prev, ...newPosts] : newPosts));
-      setError(null);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (userId) {
+      fetchPosts(0, false);
     }
-  }, [userId]);
+  }, [fetchPosts, userId]);
 
-  useEffect(() => {
-    fetchPosts(0, false);
-  }, [fetchPosts]);
-
-  useEffect(() => {
-    if (!hasMore) return;
-
-    const interval = setInterval(() => {
-      const nextOffset = offset + 25;
-      setOffset(nextOffset);
-      fetchPosts(nextOffset, true);
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [offset, hasMore, fetchPosts]);
+  const loadMorePosts = useCallback(() => {
+    const nextOffset = offset + limit;
+    setOffset(nextOffset);
+    fetchPosts(nextOffset, true);
+  }, [offset, fetchPosts]);
 
   const refreshPosts = useCallback(() => {
     setOffset(0);
@@ -65,6 +75,8 @@ export function usePosts() {
     error,
     hasMore,
     refreshPosts,
+    loadMorePosts,
+    initialLoading
   };
 }
 
