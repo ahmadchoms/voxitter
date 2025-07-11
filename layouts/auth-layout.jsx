@@ -91,24 +91,6 @@ export function AuthLayout({
                 >
                     {children}
                 </motion.div>
-
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.5, delay: 0.5 }}
-                    className="text-center mt-6"
-                >
-                    <Button
-                        variant="ghost"
-                        asChild
-                        className="text-gray-400 hover:text-gray-700 transition-colors"
-                    >
-                        <Link href="/" className="flex items-center gap-2">
-                            <ArrowRight className="w-4 h-4 rotate-180" />
-                            Kembali ke beranda
-                        </Link>
-                    </Button>
-                </motion.div>
             </motion.div>
         </div>
     );

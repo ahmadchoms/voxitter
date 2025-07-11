@@ -2,18 +2,21 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { postsService } from "@/lib/supabase/posts";
+import { useSession } from "next-auth/react";
 
 export function usePosts() {
+  const { data: session } = useSession();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [hasMore, setHasMore] = useState(true);
   const [offset, setOffset] = useState(0);
+  const userId = session?.user?.id
 
   const fetchPosts = useCallback(async (currentOffset = 0, append = false) => {
     try {
       setLoading(true);
-      const result = await postsService.getPosts(currentOffset, 25);
+      const result = await postsService.getPosts(currentOffset, 25, userId);
 
       if (result.error) {
         throw new Error(result.error);
@@ -32,7 +35,7 @@ export function usePosts() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     fetchPosts(0, false);

@@ -11,7 +11,7 @@ import { useSession } from "next-auth/react";
 
 export default function Home() {
   const { data: session } = useSession()
-  const { posts, loading, error, hasMore, refreshPosts } = usePosts();
+  const { posts, loading, error, refreshPosts } = usePosts();
 
   if (loading) return <Loading />
 
