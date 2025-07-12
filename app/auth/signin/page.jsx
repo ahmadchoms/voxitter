@@ -7,10 +7,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { signInSchema } from "@/lib/validation/users";
-import { LOADING_STATES, SIGNIN_FORM_DEFAULTS } from "@/lib/constants/auth";
+import { LOADING_STATES } from "@/lib/constants/auth";
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "@/lib/constants/message";
 import usePasswordToggle from "@/hooks/use-password-toggle";
 import SignInView from "@/components/view/auth/signin";
+import { SIGNIN_FORM_DEFAULTS } from "@/lib/constants/form";
 
 export default function SignInPage() {
   const [loading, setLoading] = useState(null);

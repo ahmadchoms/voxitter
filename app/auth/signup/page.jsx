@@ -11,8 +11,9 @@ import { usersService } from "@/lib/supabase/users";
 import usePasswordToggle from "@/hooks/use-password-toggle";
 import useUsernameValidation from "@/hooks/use-username-validation";
 import SignUpView from "@/components/view/auth/signup";
-import { LOADING_STATES, SIGNUP_FORM_DEFAULTS } from "@/lib/constants/auth";
+import { LOADING_STATES } from "@/lib/constants/auth";
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "@/lib/constants/message";
+import { SIGNUP_FORM_DEFAULTS } from "@/lib/constants/form";
 
 export default function SignUpPage() {
     const [loading, setLoading] = useState(LOADING_STATES.NONE);

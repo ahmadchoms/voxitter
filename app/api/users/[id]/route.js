@@ -1,23 +1,45 @@
 import { NextResponse } from "next/server";
 import { usersService } from "@/lib/supabase/users";
 import { updateUserSchema } from "@/lib/validation/users";
+import { postsService } from "@/lib/supabase/posts";
 
-export async function GET(request, { params }) {
+export async function GET(request, context) {
+  const { params } = context;
+  const username = params.id;
   try {
-    const result = await usersService.getUserById(params.id);
-
-    if (result.error) {
-      return NextResponse.json({ error: result.error }, { status: 404 });
+    if (!username) {
+      return NextResponse.json(
+        { error: "Username is required" },
+        { status: 400 }
+      );
     }
 
-    return NextResponse.json(result.data);
+    const userRes = await usersService.getUserByUsername(username);
+
+    if (userRes.error || !userRes.data) {
+      return NextResponse.json(
+        { error: userRes.error || "User not found" },
+        { status: 404 }
+      );
+    }
+
+    const postRes = await postsService.getPostsByUser(userRes.data.id);
+
+    if (postRes.error) {
+      return NextResponse.json({ error: postRes.error }, { status: 500 });
+    }
+
+    return NextResponse.json({
+      user: userRes.data,
+      posts: postRes.data,
+    });
   } catch (error) {
-    console.error("Error fetching user:", error);
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   }
 }
 
-export async function PUT(request, { params }) {
+export async function PUT(request, context) {
+  const { params } = context;
   try {
     const body = await request.json();
     const validatedData = updateUserSchema.parse(body);
@@ -38,7 +60,8 @@ export async function PUT(request, { params }) {
   }
 }
 
-export async function DELETE(request, { params }) {
+export async function DELETE(request, context) {
+  const { params } = context;
   try {
     const result = await usersService.deleteUser(params.id);
 

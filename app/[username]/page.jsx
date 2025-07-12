@@ -11,26 +11,27 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { ProfileHeader } from "@/components/profile/profile-header";
 import { ProfileTabs } from "@/components/profile/profile-tabs";
+import { useUsername } from "@/hooks/use-users";
+import { MainLayout } from "@/layouts/main-layout";
+import Loading from "@/components/fragments/loading";
+import { profileSchema } from "@/lib/validation/profile";
+import { PROFILE_FORM_DEFAULTS } from "@/lib/constants/form";
 
 export default function PublicProfilePage() {
     const params = useParams();
     const router = useRouter();
     const { data: session } = useSession();
     const username = params.username;
-    const { data, loading, error } = usePublicProfile(username);
+    const { user, loading, error } = useUsername(username);
 
     const {
         register,
         handleSubmit,
         formState: { errors },
         reset,
-    } = useForm ({
+    } = useForm({
         resolver: zodResolver(profileSchema),
-        defaultValues: {
-            full_name: "",
-            username: "",
-            bio: "",
-        },
+        defaultValues: PROFILE_FORM_DEFAULTS,
     });
 
     const [bookmarkedPosts, setBookmarkedPosts] = useState([]);
@@ -39,14 +40,14 @@ export default function PublicProfilePage() {
     const [updateLoading, setUpdateLoading] = useState(false);
 
     useEffect(() => {
-        if (data?.user) {
+        if (user?.user) {
             reset({
-                full_name: data.user.full_name,
-                username: data.user.username,
-                bio: data.user.bio || "",
+                full_name: user.user.full_name,
+                username: user.user.username,
+                bio: user.user.bio || "",
             });
         }
-    }, [data, reset]);
+    }, [user, reset]);
 
     const onSubmit = async (data) => {
         setUpdateLoading(true);
@@ -64,7 +65,7 @@ export default function PublicProfilePage() {
         return <Loading />;
     }
 
-    if (error || !data) {
+    if (error || !user) {
         return (
             <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
                 <motion.div
@@ -95,45 +96,41 @@ export default function PublicProfilePage() {
     }
 
     return (
-        <div className="h-screen bg-gray-950 text-white flex overflow-hidden">
-            <AppSidebar />
+        <MainLayout>
+            <div className="p-5 w-full">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.1 }}
+                >
+                    <ProfileHeader
+                        user={user.user}
+                        isEditDialogOpen={isEditDialogOpen}
+                        setIsEditDialogOpen={setIsEditDialogOpen}
+                        register={register}
+                        handleSubmit={handleSubmit}
+                        errors={errors}
+                        updateLoading={updateLoading}
+                        onSubmit={onSubmit}
+                        session={session?.user}
+                    />
+                    <ProfileTabs
+                        activeTab={activeTab}
+                        setActiveTab={setActiveTab}
+                        posts={user.posts}
+                        bookmarkedPosts={bookmarkedPosts}
+                    />
+                </motion.div>
 
-            <main className="flex-1 overflow-y-auto">
-                <div className="p-5 w-full">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.1 }}
-                    >
-                        <ProfileHeader
-                            user={data.user}
-                            isEditDialogOpen={isEditDialogOpen}
-                            setIsEditDialogOpen={setIsEditDialogOpen}
-                            register={register}
-                            handleSubmit={handleSubmit}
-                            errors={errors}
-                            updateLoading={updateLoading}
-                            onSubmit={onSubmit}
-                            session={session?.user}
-                        />
-                        <ProfileTabs
-                            activeTab={activeTab}
-                            setActiveTab={setActiveTab}
-                            posts={data.posts}
-                            bookmarkedPosts={bookmarkedPosts}
-                        />
-                    </motion.div>
-
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.3 }}
-                        className="mt-12 flex justify-center gap-4"
-                    >
-                        <Link href="/leaderboard" className="px-4 py-2 rounded-md bg-background hover:bg-accent text-black font-medium">Lihat Leaderboard</Link>
-                    </motion.div>
-                </div>
-            </main>
-        </div>
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.3 }}
+                    className="mt-12 flex justify-center gap-4"
+                >
+                    <Link href="/leaderboard" className="px-4 py-2 rounded-md bg-background hover:bg-accent text-black font-medium">Lihat Leaderboard</Link>
+                </motion.div>
+            </div>
+        </MainLayout>
     );
 }

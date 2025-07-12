@@ -20,6 +20,8 @@ export default function Home() {
     initialLoading,
   } = usePosts();
 
+  console.log("posts", posts);
+
   if (error) return <ErrorMessage message={error} onRetry={refreshPosts} />;
 
   return (

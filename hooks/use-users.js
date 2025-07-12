@@ -75,6 +75,52 @@ export function useUser(userId) {
   };
 }
 
+export function useUsername(username) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchUsername = useCallback(async () => {
+    if (!username) return;
+
+    try {
+      setLoading(true);
+      const res = await fetch(`/api/users/${username}`);
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to fetch user");
+      }
+
+      setUser(data);
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [username]);
+
+  useEffect(() => {
+    if (username) {
+      fetchUsername();
+    } else {
+      setUser(null);
+      setLoading(false);
+      setError(null);
+    }
+  }, [username, fetchUsername]);
+  console.log("data", user);
+
+  return {
+    user,
+    loading,
+    error,
+    refetch: fetchUsername,
+  };
+}
+
 export function useUserSearch(searchTerm) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);

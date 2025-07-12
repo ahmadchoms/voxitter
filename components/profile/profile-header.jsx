@@ -1,8 +1,8 @@
 import React from "react";
 import { BadgeCheck, Calendar, Star, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { EditProfileDialog } from "../profile/edit-profile-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { EditProfileDialog } from "./edit-profile-dialog";
 
 export const ProfileHeader = ({
     user,

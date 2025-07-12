@@ -9,7 +9,8 @@ import { InputField } from "@/components/forms/input-field";
 import { GoogleIcon } from "@/components/fragments/google-icon";
 import PasswordToggleButton from "@/components/forms/password-toggle-button";
 import { UsernameStatusIcon } from "@/components/forms/username-status-icon";
-import { LOADING_STATES, MOTION_VARIANTS } from "@/lib/constants/auth";
+import { LOADING_STATES } from "@/lib/constants/auth";
+import { MOTION_VARIANTS } from "@/lib/constants/motion";
 
 export default function SignUpView({
     form,

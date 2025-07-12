@@ -177,7 +177,7 @@ function CommentsSection({
                     >
                         <Avatar className="w-8 h-8">
                             <AvatarFallback className="bg-gray-800 text-gray-200 text-xs">
-                                {comment.author.name
+                                {comment.author.full_name
                                     .split(" ")
                                     .map((n) => n[0])
                                     .join("")}
@@ -186,7 +186,7 @@ function CommentsSection({
                         <div className="flex-1">
                             <div className="flex items-center gap-1 mb-1">
                                 <span className="font-medium text-white text-sm">
-                                    {comment.author.name}
+                                    {comment.author.full_name}
                                 </span>
                                 {comment.author.isVerified && (
                                     <BadgeCheck
@@ -277,7 +277,7 @@ function MobileDrawer({
                         <div className="flex items-center gap-3 mb-3">
                             <Avatar className="w-10 h-10 border-2 border-gray-700">
                                 <AvatarFallback className="bg-gray-800 text-gray-200">
-                                    {post.author.name
+                                    {post.user.full_name
                                         .split(" ")
                                         .map((n) => n[0])
                                         .join("")}
@@ -286,9 +286,9 @@ function MobileDrawer({
                             <div>
                                 <div className="flex items-center gap-1">
                                     <h3 className="font-semibold text-white text-sm">
-                                        {post.author.name}
+                                        {post.user.full_name}
                                     </h3>
-                                    {post.author.isVerified && (
+                                    {post.user.isVerified && (
                                         <BadgeCheck
                                             className="w-4 h-4 text-white"
                                             stroke="white"
@@ -297,7 +297,7 @@ function MobileDrawer({
                                     )}
                                 </div>
                                 <div className="flex items-center gap-2 text-xs text-gray-400">
-                                    <span>{post.author.username}</span>
+                                    <span>{post.user.username}</span>
                                     <span>•</span>
                                     <span>{post.timestamp}</span>
                                 </div>
@@ -350,7 +350,7 @@ function MobileDrawer({
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2 mb-1">
                                         <span className="font-medium text-white text-sm">
-                                            {comment.author.name}
+                                            {comment.author.full_name}
                                         </span>
                                         {comment.author.isVerified && (
                                             <BadgeCheck className="w-4 h-4 text-blue-500 fill-current" />
