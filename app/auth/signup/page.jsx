@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { signUpSchema } from "@/lib/validation/users";
 import { usersService } from "@/lib/supabase/users";
 import usePasswordToggle from "@/hooks/use-password-toggle";
 import useUsernameValidation from "@/hooks/use-username-validation";
@@ -14,6 +13,7 @@ import SignUpView from "@/components/view/auth/signup";
 import { LOADING_STATES } from "@/lib/constants/auth";
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "@/lib/constants/message";
 import { SIGNUP_FORM_DEFAULTS } from "@/lib/constants/form";
+import { signUpSchema } from "@/lib/validation/auth";
 
 export default function SignUpPage() {
     const [loading, setLoading] = useState(LOADING_STATES.NONE);

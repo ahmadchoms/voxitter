@@ -15,198 +15,184 @@ import {
     DrawerTitle,
     DrawerTrigger,
 } from "../ui/drawer";
-import { BadgeCheck, Heart, MessageCircle, Send, Share } from "lucide-react";
-import { Badge } from "../ui/badge";
+import { BadgeCheck, Send, Trash2, Loader2 } from "lucide-react";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { motion } from "framer-motion";
 import { Avatar, AvatarFallback } from "../ui/avatar";
+import { useComments } from "@/hooks/use-comments";
+import { toast } from "sonner";
 
-const mockComments = [
-    {
-        id: 1,
-        author: {
-            name: "Budi Santoso",
-            username: "@budisantoso",
-            avatar: "/placeholder.svg?height=32&width=32",
-            isVerified: false,
-        },
-        content:
-            "Setuju sekali! Transparansi adalah kunci utama dalam implementasi kebijakan.",
-        timestamp: "1 jam yang lalu",
-        likes: 12,
-    },
-    {
-        id: 2,
-        author: {
-            name: "Siti Nurhaliza",
-            username: "@sitinur",
-            avatar: "/placeholder.svg?height=32&width=32",
-            isVerified: true,
-        },
-        content:
-            "UMKM memang perlu mendapat perhatian khusus. Semoga ada solusi konkret yang berpihak pada rakyat kecil.",
-        timestamp: "45 menit yang lalu",
-        likes: 8,
-    },
-    {
-        id: 3,
-        author: {
-            name: "Ahmad Rahman",
-            username: "@ahmadrahman",
-            avatar: "/placeholder.svg?height=32&width=32",
-            isVerified: false,
-        },
-        content:
-            "Bagus sekali pembahasannya. Kita sebagai warga negara juga harus ikut serta dalam mengawasi jalannya pemerintahan.",
-        timestamp: "30 menit yang lalu",
-        likes: 15,
-    },
-    {
-        id: 4,
-        author: {
-            name: "Dewi Sartika",
-            username: "@dewisartika",
-            avatar: "/placeholder.svg?height=32&width=32",
-            isVerified: true,
-        },
-        content:
-            "Semoga implementasinya bisa berjalan dengan baik dan tidak hanya jadi wacana belaka.",
-        timestamp: "25 menit yang lalu",
-        likes: 9,
-    },
-    {
-        id: 5,
-        author: {
-            name: "Eko Prasetyo",
-            username: "@ekoprasetyo",
-            avatar: "/placeholder.svg?height=32&width=32",
-            isVerified: false,
-        },
-        content:
-            "Perlu ada monitoring yang ketat dari masyarakat sipil untuk memastikan kebijakan ini benar-benar efektif.",
-        timestamp: "20 menit yang lalu",
-        likes: 7,
-    },
-    {
-        id: 6,
-        author: {
-            name: "Lina Marlina",
-            username: "@linam",
-            avatar: "/placeholder.svg?height=32&width=32",
-            isVerified: false,
-        },
-        content:
-            "Komentar yang sangat membangun, semoga pemerintah mendengarnya.",
-        timestamp: "18 menit yang lalu",
-        likes: 5,
-    },
-    {
-        id: 7,
-        author: {
-            name: "Rahmat Hidayat",
-            username: "@rahmath",
-            avatar: "/placeholder.svg?height=32&width=32",
-            isVerified: true,
-        },
-        content:
-            "Keterlibatan publik sangat penting dalam menjaga transparansi kebijakan.",
-        timestamp: "15 menit yang lalu",
-        likes: 13,
-    },
-    {
-        id: 8,
-        author: {
-            name: "Nur Aisyah",
-            username: "@aisyah_nur",
-            avatar: "/placeholder.svg?height=32&width=32",
-            isVerified: false,
-        },
-        content:
-            "Saya berharap ada forum publik rutin untuk membahas kebijakan seperti ini.",
-        timestamp: "12 menit yang lalu",
-        likes: 6,
-    },
-    {
-        id: 9,
-        author: {
-            name: "Fajar Nugroho",
-            username: "@fajarnug",
-            avatar: "/placeholder.svg?height=32&width=32",
-            isVerified: true,
-        },
-        content:
-            "Kolaborasi antara pemerintah dan masyarakat harus diperkuat lagi.",
-        timestamp: "10 menit yang lalu",
-        likes: 11,
-    },
-    {
-        id: 10,
-        author: {
-            name: "Melati Putri",
-            username: "@melatiputri",
-            avatar: "/placeholder.svg?height=32&width=32",
-            isVerified: false,
-        },
-        content:
-            "Topik ini sangat relevan. Mari terus diskusikan dan beri masukan positif.",
-        timestamp: "5 menit yang lalu",
-        likes: 4,
-    },
-];
+function CommentItem({ comment, currentUserId, refreshComments }) {
+    const [isDeleting, setIsDeleting] = useState(false);
 
+    const handleDelete = async () => {
+        if (isDeleting) return;
 
+        setIsDeleting(true);
+        try {
+            const response = await fetch(`/api/comments/${comment.id}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ user_id: currentUserId }),
+            });
 
-function CommentsSection({
-    newComment,
-    setNewComment,
-}) {
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || "Failed to delete comment");
+            }
+
+            toast.success("Komentar berhasil dihapus");
+            refreshComments();
+        } catch (error) {
+            console.error("Error deleting comment:", error);
+            toast.error(error.message || "Gagal menghapus komentar");
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex gap-3"
+        >
+            <Avatar className="w-8 h-8">
+                <AvatarFallback className="bg-gray-800 text-gray-200 text-xs">
+                    {comment.user.username
+                        ? comment.user.username
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                            .toUpperCase()
+                        : "U"}
+                </AvatarFallback>
+            </Avatar>
+            <div className="flex-1">
+                <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-1 mb-1">
+                        <span className="font-medium text-white text-sm">
+                            {comment.user.username}
+                        </span>
+                        {comment.user.is_verified && (
+                            <BadgeCheck
+                                className="w-4 h-4 text-white"
+                                fill="blue"
+                                stroke="white"
+                            />
+                        )}
+                        <span className="text-xs text-gray-500">
+                            {new Date(comment.created_at).toLocaleDateString("id-ID")}
+                        </span>
+                    </div>
+                    {comment.user.id === currentUserId && (
+                        <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={handleDelete}
+                            disabled={isDeleting}
+                            className="text-gray-400 hover:text-red-400 p-1 h-auto"
+                        >
+                            {isDeleting ? (
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                                <Trash2 className="w-3 h-3" />
+                            )}
+                        </Button>
+                    )}
+                </div>
+                <p className="text-gray-200 text-sm mb-2">{comment.content}</p>
+            </div>
+        </motion.div>
+    );
+}
+
+function CommentsSection({ postId, currentUserId }) {
+    const [newComment, setNewComment] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const { comments, loading, error, refreshComments } = useComments(postId);
+
+    const handleSubmitComment = async () => {
+        if (!newComment.trim() || isSubmitting) return;
+
+        setIsSubmitting(true);
+        try {
+            const response = await fetch(`/api/posts/${postId}/comments`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ content: newComment.trim() }),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || "Failed to add comment");
+            }
+
+            toast.success("Komentar berhasil ditambahkan");
+            setNewComment("");
+            refreshComments();
+        } catch (error) {
+            console.error("Error adding comment:", error);
+            toast.error(error.message || "Gagal menambahkan komentar");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex flex-col h-full overflow-hidden">
+                <div className="p-4 border-b border-gray-800">
+                    <h3 className="font-semibold text-white">Komentar</h3>
+                </div>
+                <div className="flex-1 flex items-center justify-center">
+                    <Loader2 className="size-10 animate-spin text-blue-500" />
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex flex-col h-full overflow-hidden">
+                <div className="p-4 border-b border-gray-800">
+                    <h3 className="font-semibold text-white">Komentar</h3>
+                </div>
+                <div className="flex-1 flex items-center justify-center">
+                    <div className="text-red-400">Error: {error}</div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="flex flex-col h-full overflow-hidden">
             <div className="p-4 border-b border-gray-800">
-                <h3 className="font-semibold text-white">Komentar</h3>
+                <h3 className="font-semibold text-white">
+                    Komentar ({comments.length})
+                </h3>
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[32.5rem]">
-                {mockComments.map((comment) => (
-                    <motion.div
-                        key={comment.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="flex gap-3"
-                    >
-                        <Avatar className="w-8 h-8">
-                            <AvatarFallback className="bg-gray-800 text-gray-200 text-xs">
-                                {comment.author.full_name
-                                    .split(" ")
-                                    .map((n) => n[0])
-                                    .join("")}
-                            </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                            <div className="flex items-center gap-1 mb-1">
-                                <span className="font-medium text-white text-sm">
-                                    {comment.author.full_name}
-                                </span>
-                                {comment.author.isVerified && (
-                                    <BadgeCheck
-                                        className="w-4 h-4 text-white"
-                                        fill="blue"
-                                        stroke="white"
-                                    />
-                                )}
-                                <span className="text-xs text-gray-500">
-                                    {comment.timestamp}
-                                </span>
-                            </div>
-                            <p className="text-gray-200 text-sm mb-2">{comment.content}</p>
-                            <button className="flex items-center gap-1 text-xs text-gray-400 hover:text-red-400 transition-colors">
-                                <Heart className="w-3 h-3" />
-                                <span>{comment.likes}</span>
-                            </button>
-                        </div>
-                    </motion.div>
-                ))}
+                {comments.length === 0 ? (
+                    <div className="text-center text-gray-400 py-8">
+                        Belum ada komentar
+                    </div>
+                ) : (
+                    comments.map((comment) => (
+                        <CommentItem
+                            key={comment.id}
+                            comment={comment}
+                            currentUserId={currentUserId}
+                            refreshComments={refreshComments}
+                        />
+                    ))
+                )}
             </div>
 
             <div className="p-4 border-t border-gray-800">
@@ -221,10 +207,26 @@ function CommentsSection({
                             placeholder="Tulis komentar..."
                             value={newComment}
                             onChange={(e) => setNewComment(e.target.value)}
-                            className="h-auto min-h-[40px] max-h-[15rem] overflow-y-auto resize-none bg-gray-800 border-gray-700 text-white placeholder-gray-400"
+                            disabled={isSubmitting}
+                            className="h-auto min-h-[40px] max-h-[15rem] overflow-y-auto resize-none bg-gray-800 border-gray-700 text-white placeholder-gray-400 disabled:opacity-50"
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter" && !e.shiftKey) {
+                                    e.preventDefault();
+                                    handleSubmitComment();
+                                }
+                            }}
                         />
-                        <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-                            <Send className="w-4 h-4" />
+                        <Button
+                            size="sm"
+                            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600"
+                            onClick={handleSubmitComment}
+                            disabled={!newComment.trim() || isSubmitting}
+                        >
+                            {isSubmitting ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                                <Send className="w-4 h-4" />
+                            )}
                         </Button>
                     </div>
                 </div>
@@ -233,174 +235,7 @@ function CommentsSection({
     );
 }
 
-function DesktopDialog({
-    trigger,
-}) {
-    const [newComment, setNewComment] = useState("");
-
-    return (
-        <Dialog>
-            <DialogTrigger asChild>{trigger}</DialogTrigger>
-            <DialogContent className="max-w-4xl w-full h-[80vh] p-0 bg-gray-900 border-gray-800">
-                <DialogHeader className="sr-only">
-                    <DialogTitle>Komentar Post</DialogTitle>
-                </DialogHeader>
-                <div className="flex h-full">
-                    <div className="flex-1">
-                        <CommentsSection
-                            newComment={newComment}
-                            setNewComment={setNewComment}
-                        />
-                    </div>
-                </div>
-            </DialogContent>
-        </Dialog>
-    );
-}
-
-function MobileDrawer({
-    post,
-    trigger,
-}) {
-    const [newComment, setNewComment] = useState("");
-
-    return (
-        <Drawer>
-            <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-            <DrawerContent className="h-[90vh] bg-gray-900 border-gray-800">
-                <DrawerHeader>
-                    <DrawerTitle className="text-white">Komentar</DrawerTitle>
-                </DrawerHeader>
-
-                <div className="flex-1 overflow-hidden flex flex-col">
-                    <div className="p-4 border-b border-gray-800">
-                        <div className="flex items-center gap-3 mb-3">
-                            <Avatar className="w-10 h-10 border-2 border-gray-700">
-                                <AvatarFallback className="bg-gray-800 text-gray-200">
-                                    {post.user.full_name
-                                        .split(" ")
-                                        .map((n) => n[0])
-                                        .join("")}
-                                </AvatarFallback>
-                            </Avatar>
-                            <div>
-                                <div className="flex items-center gap-1">
-                                    <h3 className="font-semibold text-white text-sm">
-                                        {post.user.full_name}
-                                    </h3>
-                                    {post.user.isVerified && (
-                                        <BadgeCheck
-                                            className="w-4 h-4 text-white"
-                                            stroke="white"
-                                            fill="blue"
-                                        />
-                                    )}
-                                </div>
-                                <div className="flex items-center gap-2 text-xs text-gray-400">
-                                    <span>{post.user.username}</span>
-                                    <span>•</span>
-                                    <span>{post.timestamp}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <Badge
-                            variant="secondary"
-                            className="bg-gray-800 text-gray-200 mb-2"
-                        >
-                            {post.category}
-                        </Badge>
-
-                        <p className="text-gray-200 text-sm leading-relaxed mb-3">
-                            {post.content}
-                        </p>
-
-                        <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-1 text-gray-400 text-sm">
-                                <Heart className="w-4 h-4" />
-                                <span>{post.likes}</span>
-                            </div>
-                            <div className="flex items-center gap-1 text-gray-400 text-sm">
-                                <MessageCircle className="w-4 h-4" />
-                                <span>{post.comments}</span>
-                            </div>
-                            <div className="flex items-center gap-1 text-gray-400 text-sm">
-                                <Share className="w-4 h-4" />
-                                <span>{post.shares}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                        {mockComments.map((comment) => (
-                            <motion.div
-                                key={comment.id}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="flex gap-3"
-                            >
-                                <Avatar className="w-8 h-8">
-                                    <AvatarFallback className="bg-gray-800 text-gray-200 text-xs">
-                                        {comment.author.name
-                                            .split(" ")
-                                            .map((n) => n[0])
-                                            .join("")}
-                                    </AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <span className="font-medium text-white text-sm">
-                                            {comment.author.full_name}
-                                        </span>
-                                        {comment.author.isVerified && (
-                                            <BadgeCheck className="w-4 h-4 text-blue-500 fill-current" />
-                                        )}
-                                        <span className="text-xs text-gray-500">
-                                            {comment.timestamp}
-                                        </span>
-                                    </div>
-                                    <p className="text-gray-200 text-sm mb-2">
-                                        {comment.content}
-                                    </p>
-                                    <button className="flex items-center gap-1 text-xs text-gray-400 hover:text-red-400 transition-colors">
-                                        <Heart className="w-3 h-3" />
-                                        <span>{comment.likes}</span>
-                                    </button>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </div>
-
-                    <div className="p-4 border-t border-gray-800">
-                        <div className="flex gap-3">
-                            <Avatar className="w-8 h-8">
-                                <AvatarFallback className="bg-gray-800 text-gray-200 text-xs">
-                                    You
-                                </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 flex gap-2">
-                                <Textarea
-                                    placeholder="Tulis komentar..."
-                                    value={newComment}
-                                    onChange={(e) => setNewComment(e.target.value)}
-                                    className="min-h-[40px] bg-gray-800 border-gray-700 text-white placeholder-gray-400 resize-none"
-                                />
-                                <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-                                    <Send className="w-4 h-4" />
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </DrawerContent>
-        </Drawer>
-    );
-}
-
-export default function CommentDialog({
-    post,
-    trigger,
-}) {
+export default function CommentDialog({ post, trigger, currentUserId }) {
     const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
@@ -413,9 +248,39 @@ export default function CommentDialog({
         return () => window.removeEventListener("resize", checkMobile);
     }, []);
 
-    if (isMobile) {
-        return <MobileDrawer post={post} trigger={trigger} />;
-    }
+    const DialogComponent = isMobile ? Drawer : Dialog;
+    const TriggerComponent = isMobile ? DrawerTrigger : DialogTrigger;
+    const ContentComponent = isMobile ? DrawerContent : DialogContent;
 
-    return <DesktopDialog trigger={trigger} />;
+    return (
+        <DialogComponent>
+            <TriggerComponent asChild>{trigger}</TriggerComponent>
+            <ContentComponent
+                className={
+                    isMobile
+                        ? "h-[90vh] bg-gray-900 border-gray-800"
+                        : "max-w-4xl w-full h-[80vh] p-0 bg-gray-900 border-gray-800"
+                }
+            >
+                {!isMobile && (
+                    <DialogHeader className="sr-only">
+                        <DialogTitle>Komentar Post</DialogTitle>
+                    </DialogHeader>
+                )}
+                {isMobile && (
+                    <DrawerHeader>
+                        <DrawerTitle className="text-white">Komentar</DrawerTitle>
+                    </DrawerHeader>
+                )}
+                <div className="flex h-full">
+                    <div className="flex-1">
+                        <CommentsSection
+                            postId={post.id}
+                            currentUserId={currentUserId}
+                        />
+                    </div>
+                </div>
+            </ContentComponent>
+        </DialogComponent>
+    );
 }

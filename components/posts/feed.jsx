@@ -110,7 +110,7 @@ export default function Feed({ post }) {
                                 <div className="flex items-center gap-2 text-sm text-gray-400">
                                     <span>{post.user.username}</span>
                                     <span>•</span>
-                                    <span>{post.created_at}</span>
+                                    <span>{formatDate(post.created_at)}</span>
                                     <span>•</span>
                                     <Badge
                                         variant="outline"
@@ -150,7 +150,7 @@ export default function Feed({ post }) {
                         <div className="flex items-center gap-6">
                             <FeedButton
                                 icon={Heart}
-                                count={post.likes_count}
+                                count={likesCount}
                                 isActive={post.is_liked}
                                 activeColor="text-red-500"
                                 hoverColor="text-red-400"
@@ -159,6 +159,7 @@ export default function Feed({ post }) {
 
                             <CommentDialog
                                 post={post}
+                                currentUserId={session?.user?.id}
                                 trigger={
                                     <FeedButton
                                         icon={MessageCircle}

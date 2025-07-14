@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { postsService } from "@/lib/supabase/posts";
-import { createPostSchema } from "@/lib/validation/posts";
+import { postSchema } from "@/lib/validation/post";
 
 export async function GET(request) {
   try {
@@ -37,7 +37,7 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const validatedData = createPostSchema.parse(body);
+    const validatedData = postSchema.parse(body);
 
     const result = await postsService.createPost(validatedData);
 

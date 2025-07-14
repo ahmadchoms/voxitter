@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { postsService } from "@/lib/supabase/posts";
-import { postSchema } from "@/lib/validation/posts";
+import { postSchema } from "@/lib/validation/post";
 
 export async function GET(request, { params }) {
   try {

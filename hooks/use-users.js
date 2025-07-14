@@ -111,7 +111,6 @@ export function useUsername(username) {
       setError(null);
     }
   }, [username, fetchUsername]);
-  console.log("data", user);
 
   return {
     user,

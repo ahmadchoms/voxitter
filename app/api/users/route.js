@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { usersService } from "@/lib/supabase/users";
-import { userSchema } from "@/lib/validation/users";
+import { userSchema } from "@/lib/validation/user";
 
 export async function GET(request) {
   try {

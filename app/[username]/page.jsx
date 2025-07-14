@@ -14,8 +14,8 @@ import { ProfileTabs } from "@/components/profile/profile-tabs";
 import { useUsername } from "@/hooks/use-users";
 import { MainLayout } from "@/layouts/main-layout";
 import Loading from "@/components/fragments/loading";
-import { profileSchema } from "@/lib/validation/profile";
 import { PROFILE_FORM_DEFAULTS } from "@/lib/constants/form";
+import { profileSchema } from "@/lib/validation/user";
 
 export default function PublicProfilePage() {
     const params = useParams();

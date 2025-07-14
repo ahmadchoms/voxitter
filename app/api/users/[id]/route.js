@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { usersService } from "@/lib/supabase/users";
-import { updateUserSchema } from "@/lib/validation/users";
 import { postsService } from "@/lib/supabase/posts";
+import { updateUserSchema } from "@/lib/validation/user";
 
 export async function GET(request, context) {
   const { params } = context;
