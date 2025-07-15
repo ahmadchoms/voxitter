@@ -13,7 +13,7 @@ export async function DELETE(req, { params }) {
 
   try {
     const body = await req.json();
-    const { user_id } = body;
+    const { user_id, posts_id } = body;
 
     if (!user_id) {
       return NextResponse.json(
@@ -22,7 +22,7 @@ export async function DELETE(req, { params }) {
       );
     }
 
-    const result = await commentsService.deleteComment(commentId, user_id);
+    const result = await commentsService.deleteComment(commentId, user_id, posts_id);
 
     if (result.error) {
       return NextResponse.json({ error: result.error }, { status: 400 });

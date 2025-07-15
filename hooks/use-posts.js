@@ -28,7 +28,7 @@ export function usePosts() {
         setLoading(true);
 
         const res = await fetch(
-          `/api/posts?offset=${currentOffset}&limit=${limit}`
+          `/api/posts?offset=${currentOffset}&limit=${limit}&viewer_id=${userId}`
         );
         const data = await res.json();
 
@@ -76,7 +76,7 @@ export function usePosts() {
     hasMore,
     refreshPosts,
     loadMorePosts,
-    initialLoading
+    initialLoading,
   };
 }
 
@@ -151,5 +151,52 @@ export function usePostsByCategory(categoryId) {
     loading,
     error,
     refetch: fetchCategoryPosts,
+  };
+}
+
+export function usePostsByLike(userId) {
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchLikedPosts = useCallback(
+    async (append = false) => {
+      if (!userId) return;
+
+      try {
+        setLoading(true);
+
+        const result = await fetch(`/api/posts/${userId}/like`);
+
+        if (!result.ok) {
+          const errorData = await result.json();
+          throw new Error(errorData.error || "Failed to fetch liked posts");
+        }
+
+        const data = await result.json();
+        const newPosts = data || [];
+
+        setPosts((prev) => (append ? [...prev, ...newPosts] : newPosts));
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching liked posts:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [userId]
+  );
+
+  useEffect(() => {
+    if (userId) {
+      fetchLikedPosts(0, false);
+    }
+  }, [fetchLikedPosts, userId]);
+
+  return {
+    posts,
+    loading,
+    error,
   };
 }

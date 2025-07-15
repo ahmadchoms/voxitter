@@ -11,18 +11,18 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { ProfileHeader } from "@/components/profile/profile-header";
 import { ProfileTabs } from "@/components/profile/profile-tabs";
-import { useUsername } from "@/hooks/use-users";
 import { MainLayout } from "@/layouts/main-layout";
 import Loading from "@/components/fragments/loading";
 import { PROFILE_FORM_DEFAULTS } from "@/lib/constants/form";
 import { profileSchema } from "@/lib/validation/user";
+import { useUserProfile } from "@/hooks/use-users";
 
 export default function PublicProfilePage() {
-    const params = useParams();
+    const { username } = useParams();
     const router = useRouter();
     const { data: session } = useSession();
-    const username = params.username;
-    const { user, loading, error } = useUsername(username);
+    const { profile, loading, error, refetch } = useUserProfile(session?.user?.id);
+    console.log("Profile Data:", profile?.user?.id);
 
     const {
         register,
@@ -40,14 +40,14 @@ export default function PublicProfilePage() {
     const [updateLoading, setUpdateLoading] = useState(false);
 
     useEffect(() => {
-        if (user?.user) {
+        if (profile?.user) {
             reset({
-                full_name: user.user.full_name,
-                username: user.user.username,
-                bio: user.user.bio || "",
+                full_name: profile.user.full_name,
+                username: profile.user.username,
+                bio: profile.user.bio || "",
             });
         }
-    }, [user, reset]);
+    }, [profile, reset]);
 
     const onSubmit = async (data) => {
         setUpdateLoading(true);
@@ -65,7 +65,7 @@ export default function PublicProfilePage() {
         return <Loading />;
     }
 
-    if (error || !user) {
+    if (error || !profile) {
         return (
             <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
                 <motion.div
@@ -102,9 +102,10 @@ export default function PublicProfilePage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.1 }}
+                    className="space-y-8"
                 >
                     <ProfileHeader
-                        user={user.user}
+                        user={profile.user}
                         isEditDialogOpen={isEditDialogOpen}
                         setIsEditDialogOpen={setIsEditDialogOpen}
                         register={register}
@@ -117,19 +118,12 @@ export default function PublicProfilePage() {
                     <ProfileTabs
                         activeTab={activeTab}
                         setActiveTab={setActiveTab}
-                        posts={user.posts}
+                        posts={profile.postsData}
+                        user={profile?.user?.id}
                         bookmarkedPosts={bookmarkedPosts}
                     />
                 </motion.div>
 
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.3 }}
-                    className="mt-12 flex justify-center gap-4"
-                >
-                    <Link href="/leaderboard" className="px-4 py-2 rounded-md bg-background hover:bg-accent text-black font-medium">Lihat Leaderboard</Link>
-                </motion.div>
             </div>
         </MainLayout>
     );

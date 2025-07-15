@@ -36,7 +36,7 @@ function CommentItem({ comment, currentUserId, refreshComments }) {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ user_id: currentUserId }),
+                body: JSON.stringify({ user_id: currentUserId, posts_id: comment.post_id }),
             });
 
             const result = await response.json();

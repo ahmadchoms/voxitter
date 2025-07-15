@@ -9,6 +9,7 @@ export async function GET(request) {
     const offset = Number.parseInt(searchParams.get("offset") || "0");
     const userId = searchParams.get("user_id");
     const categoryId = searchParams.get("category_id");
+    const viewerId = searchParams.get("viewer_id");
 
     let result;
 
@@ -17,7 +18,7 @@ export async function GET(request) {
     } else if (categoryId) {
       result = await postsService.getPostsByCategory(categoryId, offset, limit);
     } else {
-      result = await postsService.getPosts(offset, limit);
+      result = await postsService.getPosts(offset, limit, viewerId);
     }
 
     if (result.error) {

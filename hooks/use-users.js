@@ -197,3 +197,48 @@ export function useTopUsers(limit = 10) {
     refetch: fetchTopUsers,
   };
 }
+
+export function useUserProfile(userId) {
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchProfile = useCallback(async () => {
+    if (!userId) return;
+
+    try {
+      setLoading(true);
+      const res = await fetch(`/api/users/${userId}/profile`);
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to fetch user profile");
+      }
+
+      setProfile(data);
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+      setProfile(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    if (userId) {
+      fetchProfile();
+    } else {
+      setProfile(null);
+      setLoading(false);
+      setError(null);
+    }
+  }, [userId, fetchProfile]);
+
+  return {
+    profile,
+    loading,
+    error,
+    refetch: fetchProfile,
+  };
+}

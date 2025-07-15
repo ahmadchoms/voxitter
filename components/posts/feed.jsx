@@ -13,10 +13,10 @@ import { useSession } from "next-auth/react";
 import { useState } from "react";
 
 export default function Feed({ post }) {
-    const { data: session } = useSession()
-    const [isLiked, setIsLiked] = useState(false)
-    const [isBookmarked, setIsBookmarked] = useState(false)
-    const [likesCount, setLikesCount] = useState(post?.likes_count || 0)
+    const { data: session } = useSession();
+    const [isLiked, setIsLiked] = useState(post?.is_liked || false);
+    const [isBookmarked, setIsBookmarked] = useState(post?.is_bookmarked || false);
+    const [likesCount, setLikesCount] = useState(post?.likes_count || 0);
 
     if (!post || !post.user) {
         return (
@@ -37,50 +37,99 @@ export default function Feed({ post }) {
                     </div>
                 </CardContent>
             </Card>
-        )
+        );
     }
 
     const handleLike = async () => {
+        if (!session) {
+            alert("You need to be logged in to like posts.");
+            return;
+        }
+
+        const previousIsLiked = isLiked;
+        const previousLikesCount = likesCount;
+        setIsLiked((prev) => !prev);
+        setLikesCount((prev) => (previousIsLiked ? prev - 1 : prev + 1));
+
         try {
-            const method = isLiked ? "DELETE" : "POST"
             const response = await fetch(`/api/posts/${post.id}/like`, {
-                method,
+                method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ user_id: session.user.id }),
-            })
+            });
 
-            if (response.ok) {
-                setIsLiked(!isLiked)
-                setLikesCount((prev) => (isLiked ? prev - 1 : prev + 1))
+            if (!response.ok) {
+                setIsLiked(previousIsLiked);
+                setLikesCount(previousLikesCount);
+                const errorData = await response.json();
+                console.error("Failed to toggle like:", errorData.message);
+                alert(errorData.message || "Something went wrong while liking the post.");
+                return;
             }
+
+            const data = await response.json();
+            
+            setIsLiked(data.isLiked);
+            setLikesCount(data.newLikesCount);
         } catch (error) {
-            console.error("Error toggling like:", error)
+            setIsLiked(previousIsLiked);
+            setLikesCount(previousLikesCount);
+            console.error("Network error while liking post:", error);
+            alert("Network error. Please try again.");
+        }
+    };
+
+    const handleBookmark = async () => {
+        if (!session) {
+            alert("You need to be logged in to bookmark posts.");
+            return;
+        }
+
+        const previousIsBookmarked = isBookmarked;
+        setIsBookmarked((prev) => !prev);
+
+        try {
+            const response = await fetch(`/api/posts/${post.id}/bookmarks`, { // Assuming a new bookmark API route
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+
+            if (!response.ok) {
+                setIsBookmarked(previousIsBookmarked);
+                const errorData = await response.json();
+                console.error("Failed to toggle bookmark:", errorData.message);
+                alert(errorData.message || "Something went wrong while bookmarking the post.");
+                return;
+            }
+
+            const data = await response.json();
+            setIsBookmarked(data.isBookmarked);
+        } catch (error) {
+            setIsBookmarked(previousIsBookmarked);
+            console.error("Network error while bookmarking post:", error);
+            alert("Network error. Please try again.");
         }
     }
 
-    const handleBookmark = () => {
-        setIsBookmarked(!isBookmarked)
-    }
-
     const formatDate = (dateString) => {
-        const date = new Date(dateString)
-        const now = new Date()
-        const diffInHours = Math.floor((now - date) / (1000 * 60 * 60))
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffInHours = Math.floor((now - date) / (1000 * 60 * 60));
 
-        if (diffInHours < 1) return "Baru saja"
-        if (diffInHours < 24) return `${diffInHours}j`
-        if (diffInHours < 168) return `${Math.floor(diffInHours / 24)}h`
-        return date.toLocaleDateString("id-ID")
-    }
+        if (diffInHours < 1) return "Baru saja";
+        if (diffInHours < 24) return `${diffInHours}j`;
+        if (diffInHours < 168) return `${Math.floor(diffInHours / 24)}h`;
+        return date.toLocaleDateString("id-ID");
+    };
 
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            whileHover={{ scale: 1.01 }}
         >
             <Card className="bg-gray-900 border-gray-800 hover:border-gray-700 transition-all duration-200">
                 <CardHeader>
@@ -151,7 +200,7 @@ export default function Feed({ post }) {
                             <FeedButton
                                 icon={Heart}
                                 count={likesCount}
-                                isActive={post.is_liked}
+                                isActive={isLiked}
                                 activeColor="text-red-500"
                                 hoverColor="text-red-400"
                                 onClick={handleLike}
@@ -191,9 +240,9 @@ export default function Feed({ post }) {
                                     transition={{ duration: 0.2 }}
                                 >
                                     <Bookmark
-                                        className={`w-5 h-5 transition-colors duration-200 ${post.is_bookmarked
-                                                ? "text-white fill-current"
-                                                : "text-gray-400 hover:text-gray-400"
+                                        className={`w-5 h-5 transition-colors duration-200 ${isBookmarked // Use the state variable here
+                                            ? "text-white fill-current"
+                                            : "text-gray-400 hover:text-gray-400"
                                             }`}
                                     />
                                 </motion.div>
