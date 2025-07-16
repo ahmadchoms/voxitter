@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { usersService } from "@/lib/supabase/users";
 import { postsService } from "@/lib/supabase/posts";
 import { updateUserSchema } from "@/lib/validation/user";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/options";
 
 export async function GET(request, context) {
   const { params } = context;
@@ -40,6 +42,12 @@ export async function GET(request, context) {
 
 export async function PUT(request, context) {
   const { params } = context;
+  const session = await getServerSession(authOptions);
+
+  if (!session || !session.user || session.user.id !== params.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const body = await request.json();
     const validatedData = updateUserSchema.parse(body);
@@ -47,14 +55,14 @@ export async function PUT(request, context) {
     const result = await usersService.updateUser(params.id, validatedData);
 
     if (result.error) {
-      return NextResponse.json({ error: result.error }, { status: 500 });
+      return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
-    return NextResponse.json(result.data);
+    return NextResponse.json(result.data, { status: 200 });
   } catch (error) {
     console.error("Error updating user:", error);
     return NextResponse.json(
-      { error: "Failed to update user" },
+      { error: error.message || "Failed to update user" },
       { status: 500 }
     );
   }

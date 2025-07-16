@@ -7,6 +7,7 @@ export function FeedButton({
     activeColor,
     hoverColor,
     onClick,
+    disabled = false,
 }) {
     return (
         <motion.button
@@ -14,6 +15,8 @@ export function FeedButton({
             className={`flex items-center gap-2 transition-colors`}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            disabled={disabled}
+            style={{ cursor: disabled ? "not-allowed" : "pointer" }}
         >
             <motion.div whileHover={{ scale: 1.1 }} transition={{ duration: 0.2 }}>
                 <Icon

@@ -1,3 +1,4 @@
+// components/Feed.jsx
 "use client";
 
 import { Card, CardContent, CardHeader, CardFooter } from "../ui/card";
@@ -14,9 +15,14 @@ import { useState } from "react";
 
 export default function Feed({ post }) {
     const { data: session } = useSession();
-    const [isLiked, setIsLiked] = useState(post?.is_liked || false);
-    const [isBookmarked, setIsBookmarked] = useState(post?.is_bookmarked || false);
-    const [likesCount, setLikesCount] = useState(post?.likes_count || 0);
+
+    const initialIsLiked = post.likes?.some(l => l.user_id === session?.user?.id && l.post_id === post.id) || false;
+    const [isLiked, setIsLiked] = useState(initialIsLiked || post?.is_liked || false);
+    const [isLikeLoading, setIsLikeLoading] = useState(false);
+
+    const initialIsBookmarked = post.bookmarks?.some(b => b.user_id === session?.user?.id && b.post_id === post.id) || false;
+    const [isBookmarked, setIsBookmarked] = useState(initialIsBookmarked || post?.is_bookmarked || false);
+    const [isBookmarkLoading, setIsBookmarkLoading] = useState(false);
 
     if (!post || !post.user) {
         return (
@@ -46,10 +52,7 @@ export default function Feed({ post }) {
             return;
         }
 
-        const previousIsLiked = isLiked;
-        const previousLikesCount = likesCount;
-        setIsLiked((prev) => !prev);
-        setLikesCount((prev) => (previousIsLiked ? prev - 1 : prev + 1));
+        setIsLikeLoading(true);
 
         try {
             const response = await fetch(`/api/posts/${post.id}/like`, {
@@ -59,60 +62,52 @@ export default function Feed({ post }) {
                 },
             });
 
+            const result = await response.json();
+
             if (!response.ok) {
-                setIsLiked(previousIsLiked);
-                setLikesCount(previousLikesCount);
-                const errorData = await response.json();
-                console.error("Failed to toggle like:", errorData.message);
-                alert(errorData.message || "Something went wrong while liking the post.");
-                return;
+                throw new Error(result.message || "Something went wrong while liking the post.");
             }
 
-            const data = await response.json();
-            
-            setIsLiked(data.isLiked);
-            setLikesCount(data.newLikesCount);
-        } catch (error) {
-            setIsLiked(previousIsLiked);
-            setLikesCount(previousLikesCount);
-            console.error("Network error while liking post:", error);
-            alert("Network error. Please try again.");
+            setIsLiked(result.isLiked);
+
+        } catch (err) {
+            console.error("Like error:", err.message);
+            alert(err.message || "Gagal melakukan like. Coba lagi.");
+        } finally {
+            setIsLikeLoading(false);
         }
     };
 
     const handleBookmark = async () => {
-        if (!session) {
+        if (!session?.user?.id) {
             alert("You need to be logged in to bookmark posts.");
             return;
         }
 
-        const previousIsBookmarked = isBookmarked;
-        setIsBookmarked((prev) => !prev);
+        setIsBookmarkLoading(true);
 
         try {
-            const response = await fetch(`/api/posts/${post.id}/bookmarks`, { // Assuming a new bookmark API route
+            const response = await fetch(`/api/posts/${post.id}/bookmark`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
             });
 
+            const result = await response.json();
+
             if (!response.ok) {
-                setIsBookmarked(previousIsBookmarked);
-                const errorData = await response.json();
-                console.error("Failed to toggle bookmark:", errorData.message);
-                alert(errorData.message || "Something went wrong while bookmarking the post.");
-                return;
+                throw new Error(result.message || "Something went wrong.");
             }
 
-            const data = await response.json();
-            setIsBookmarked(data.isBookmarked);
-        } catch (error) {
-            setIsBookmarked(previousIsBookmarked);
-            console.error("Network error while bookmarking post:", error);
-            alert("Network error. Please try again.");
+            setIsBookmarked(result.isBookmarked);
+        } catch (err) {
+            console.error("Bookmark error:", err.message);
+            alert("Gagal melakukan bookmark. Coba lagi.");
+        } finally {
+            setIsBookmarkLoading(false);
         }
-    }
+    };
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -199,11 +194,11 @@ export default function Feed({ post }) {
                         <div className="flex items-center gap-6">
                             <FeedButton
                                 icon={Heart}
-                                count={likesCount}
                                 isActive={isLiked}
                                 activeColor="text-red-500"
                                 hoverColor="text-red-400"
                                 onClick={handleLike}
+                                disabled={isLikeLoading}
                             />
 
                             <CommentDialog
@@ -220,29 +215,25 @@ export default function Feed({ post }) {
                                 }
                             />
 
-                            <FeedButton
-                                icon={Send}
-                                isActive={false}
-                                activeColor="text-green-500"
-                                hoverColor="text-green-400"
-                            />
                         </div>
 
                         <div className="flex items-center">
                             <motion.button
                                 onClick={handleBookmark}
-                                className="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-200 hover:bg-gray-800/50"
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
+                                disabled={isBookmarkLoading}
+                                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-200 hover:bg-gray-800/50 ${isBookmarkLoading ? 'opacity-50 cursor-not-allowed' : ''
+                                    }`}
+                                whileHover={{ scale: isBookmarkLoading ? 1 : 1.05 }}
+                                whileTap={{ scale: isBookmarkLoading ? 1 : 0.95 }}
                             >
                                 <motion.div
-                                    whileHover={{ scale: 1.1 }}
+                                    whileHover={{ scale: isBookmarkLoading ? 1 : 1.1 }}
                                     transition={{ duration: 0.2 }}
                                 >
                                     <Bookmark
-                                        className={`w-5 h-5 transition-colors duration-200 ${isBookmarked // Use the state variable here
-                                            ? "text-white fill-current"
-                                            : "text-gray-400 hover:text-gray-400"
+                                        className={`w-5 h-5 transition-colors duration-200 ${isBookmarked
+                                            ? "text-yellow-500 fill-current"
+                                            : "text-gray-400 hover:text-gray-300"
                                             }`}
                                     />
                                 </motion.div>

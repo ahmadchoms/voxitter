@@ -7,7 +7,6 @@ import { ArrowLeft, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { ProfileHeader } from "@/components/profile/profile-header";
 import { ProfileTabs } from "@/components/profile/profile-tabs";
@@ -16,13 +15,13 @@ import Loading from "@/components/fragments/loading";
 import { PROFILE_FORM_DEFAULTS } from "@/lib/constants/form";
 import { profileSchema } from "@/lib/validation/user";
 import { useUserProfile } from "@/hooks/use-users";
+import { toast } from "sonner";
 
 export default function PublicProfilePage() {
     const { username } = useParams();
     const router = useRouter();
     const { data: session } = useSession();
     const { profile, loading, error, refetch } = useUserProfile(session?.user?.id);
-    console.log("Profile Data:", profile?.user?.id);
 
     const {
         register,
@@ -34,7 +33,6 @@ export default function PublicProfilePage() {
         defaultValues: PROFILE_FORM_DEFAULTS,
     });
 
-    const [bookmarkedPosts, setBookmarkedPosts] = useState([]);
     const [activeTab, setActiveTab] = useState("posts");
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [updateLoading, setUpdateLoading] = useState(false);
@@ -50,12 +48,33 @@ export default function PublicProfilePage() {
     }, [profile, reset]);
 
     const onSubmit = async (data) => {
+        if (!session?.user?.id) {
+            toast.error("Anda harus login untuk memperbarui profil.");
+            return;
+        }
+
         setUpdateLoading(true);
         try {
-            await new Promise((resolve) => setTimeout(resolve, 1500));
+            const response = await fetch(`/api/users/${session.user.id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Gagal memperbarui profil");
+            }
+
+            const updatedProfile = await response.json();
+            toast.success("Profil berhasil diperbarui!");
+
+            refetch();
             setIsEditDialogOpen(false);
         } catch (error) {
-            console.error("Error updating profile:", error);
+            toast.error("Gagal memperbarui profil: " + (error.message || "Terjadi kesalahan"));
         } finally {
             setUpdateLoading(false);
         }
@@ -119,8 +138,7 @@ export default function PublicProfilePage() {
                         activeTab={activeTab}
                         setActiveTab={setActiveTab}
                         posts={profile.postsData}
-                        user={profile?.user?.id}
-                        bookmarkedPosts={bookmarkedPosts}
+                        userId={profile?.user?.id}
                     />
                 </motion.div>
 

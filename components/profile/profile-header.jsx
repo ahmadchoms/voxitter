@@ -1,6 +1,5 @@
 import React from "react";
 import { BadgeCheck, Calendar, Star, Users, MapPin, Link2, Edit3, Trophy, TrendingUp, Activity } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { EditProfileDialog } from "./edit-profile-dialog";
 

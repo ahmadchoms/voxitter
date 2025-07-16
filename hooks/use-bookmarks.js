@@ -1,34 +1,46 @@
 "use client";
 
-import { bookmarksService } from "@/lib/supabase/bookmarks";
-import { useCallback, useEffect, useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 
-export function useBookmarkedPosts(userId) {
+export function usePostsByBookmark(userId) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchBookmarkedPosts = useCallback(async () => {
-    try {
-      setLoading(true);
-      const result = await bookmarksService.getBookmarkedPosts(userId);
+  const fetchBookmarkedPosts = useCallback(
+    async (append = false) => {
+      if (!userId) return;
 
-      if (result.error) {
-        throw new Error(result.error);
+      try {
+        setLoading(true);
+
+        const result = await fetch(`/api/posts/${userId}/bookmark`);
+
+        if (!result.ok) {
+          const errorData = await result.json();
+          throw new Error(
+            errorData.error || "Failed to fetch bookmarked posts"
+          );
+        }
+
+        const data = await result.json();
+        const newPosts = data || [];
+
+        setPosts((prev) => (append ? [...prev, ...newPosts] : newPosts));
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching bookmarked posts:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
-
-      setPosts(result.data || []);
-      setError(null);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [userId]);
+    },
+    [userId]
+  );
 
   useEffect(() => {
     if (userId) {
-      fetchBookmarkedPosts();
+      fetchBookmarkedPosts(false);
     }
   }, [fetchBookmarkedPosts, userId]);
 
@@ -36,6 +48,5 @@ export function useBookmarkedPosts(userId) {
     posts,
     loading,
     error,
-    refetch: fetchBookmarkedPosts,
   };
 }

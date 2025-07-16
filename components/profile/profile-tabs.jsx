@@ -6,17 +6,18 @@ import Feed from "../posts/feed";
 import { usePostsByLike } from "@/hooks/use-posts";
 import { ErrorMessage } from "../fragments/error-message";
 import Loading from "../fragments/loading";
+import { usePostsByBookmark } from "@/hooks/use-bookmarks";
 
 export function ProfileTabs({
     activeTab,
     setActiveTab,
     posts,
-    bookmarkedPosts,
-    user,
+    userId,
 }) {
-    const { posts: likedPosts, loading, error } = usePostsByLike(user);
+    const { posts: likedPosts, error: likeError, loading: likeLoading } = usePostsByLike(userId);
+    const { posts: bookmarkPosts, error: bookmarkError, loading: bookmarkLoading } = usePostsByBookmark(userId);
 
-    if (error) return <ErrorMessage message={error} />
+    if (likeError || bookmarkError) return <ErrorMessage message={likeError || bookmarkError} />
 
     return (
         <motion.div
@@ -49,7 +50,7 @@ export function ProfileTabs({
                     </TabsTrigger>
                 </TabsList>
 
-                <div className="mt-6"> {/* Hapus mt-6 dari TabsContent */}
+                <div className="mt-6">
                     <TabsContent value="posts" className="max-h-[calc(100vh-250px)] overflow-y-auto pr-4 space-y-4">
                         {posts && posts.length > 0 ? (
                             posts.map((post, index) => (
@@ -78,7 +79,7 @@ export function ProfileTabs({
                     </TabsContent>
 
                     <TabsContent value="likes" className="max-h-[calc(100vh-250px)] overflow-y-auto pr-4">
-                        {loading && likedPosts.length === 0 ? (
+                        {likeLoading && likedPosts.length === 0 ? (
                             <Loading />
                         ) : (
                             <div className="space-y-4">
@@ -111,29 +112,35 @@ export function ProfileTabs({
                     </TabsContent>
 
                     <TabsContent value="bookmarks" className="max-h-[calc(100vh-250px)] overflow-y-auto pr-4 space-y-4">
-                        {bookmarkedPosts && bookmarkedPosts.length > 0 ? (
-                            bookmarkedPosts.map((post, index) => (
-                                <motion.div
-                                    key={post.id}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.3, delay: index * 0.1 }}
-                                >
-                                    <Feed post={post} />
-                                </motion.div>
-                            ))
+                        {bookmarkLoading && bookmarkPosts.length === 0 ? (
+                            <Loading />
                         ) : (
-                            <Card className="bg-gray-900 border-gray-700">
-                                <CardContent className="p-8 text-center">
-                                    <Bookmark className="w-12 h-12 text-gray-500 mx-auto mb-4" />
-                                    <h3 className="font-semibold mb-2 text-white">
-                                        Belum ada postingan yang disimpan
-                                    </h3>
-                                    <p className="text-gray-400">
-                                        Konten yang Anda bookmark akan muncul di sini
-                                    </p>
-                                </CardContent>
-                            </Card>
+                            <div className="space-y-4">
+                                {bookmarkPosts.length > 0 ? (
+                                    bookmarkPosts.map((post, index) => (
+                                        <motion.div
+                                            key={post.id}
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ duration: 0.3, delay: index * 0.1 }}
+                                        >
+                                            <Feed post={post} />
+                                        </motion.div>
+                                    ))
+                                ) : (
+                                    <Card className="bg-gray-900 border-gray-700">
+                                        <CardContent className="p-8 text-center">
+                                            <Bookmark className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+                                            <h3 className="font-semibold mb-2 text-white">
+                                                Belum ada postingan yang disimpan
+                                            </h3>
+                                            <p className="text-gray-400">
+                                                Konten yang Anda simpan akan muncul di sini
+                                            </p>
+                                        </CardContent>
+                                    </Card>
+                                )}
+                            </div>
                         )}
                     </TabsContent>
                 </div>
