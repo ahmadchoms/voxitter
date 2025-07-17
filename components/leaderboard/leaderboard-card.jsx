@@ -2,8 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { BadgeCheck, Star, Award } from "lucide-react";
 import Link from "next/link";
-import { LeaderboardUser } from "@/lib/types/leaderboard";
-import { getRankIcon, getRankStyles } from "@/lib/utils/leaderboard";
+import { getRankIcon, getRankStyles } from "@/lib/utils/rank";
 
 export const LeaderboardCard = ({
     user,
@@ -28,22 +27,17 @@ export const LeaderboardCard = ({
                     stiffness: 100,
                 }}
                 className={`relative ${isFirst
-                        ? "md:order-2 md:scale-110"
-                        : isSecond
-                            ? "md:order-1"
-                            : "md:order-3"
+                    ? "md:order-2 md:scale-110"
+                    : isSecond
+                        ? "md:order-1"
+                        : "md:order-3"
                     }`}
             >
                 <Link href={`/${user.username}`}>
                     <div
-                        className={`
-            relative group cursor-pointer
-            ${styles.gradient}
-            backdrop-blur-sm rounded-2xl p-8 
-            border ${styles.border}
-            hover:scale-105 transition-all duration-500 ease-out
-            hover:shadow-2xl hover:shadow-blue-500/10
-          `}
+                        className={`relative group cursor-pointer ${styles.gradient} backdrop-blur-sm rounded-2xl p-8 
+                                    border ${styles.border} hover:scale-105 transition-all duration-500 ease-out
+                                    hover:shadow-2xl hover:shadow-blue-500/10`}
                     >
                         <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                             <div
@@ -59,7 +53,7 @@ export const LeaderboardCard = ({
                                     className={`relative inline-block p-1 rounded-full ${styles.avatar}`}
                                 >
                                     <img
-                                        src={user.avatar_url || "/default-avatar.png"}
+                                        src={user.avatar_url || "/user.png"}
                                         alt={user.full_name}
                                         className="w-20 h-20 rounded-full object-cover bg-slate-800"
                                     />
@@ -139,7 +133,7 @@ export const LeaderboardCard = ({
 
                         <div className="relative flex-shrink-0">
                             <img
-                                src={user.avatar_url || "/default-avatar.png"}
+                                src={user.avatar_url || "/user.png"}
                                 alt={user.full_name}
                                 className="w-12 h-12 rounded-full object-cover ring-2 ring-slate-700 group-hover:ring-slate-600 transition-all duration-300"
                             />

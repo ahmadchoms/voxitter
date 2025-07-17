@@ -4,20 +4,21 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { useLeaderboard } from "@/hooks/useLeaderboard";
 import { LeaderboardHeader } from "@/components/leaderboard/leaderboard-header";
 import { LeaderboardPodium } from "@/components/leaderboard/leaderboard-podium";
 import { LeaderboardList } from "@/components/leaderboard/leaderboard-list";
 import Loading from "@/components/fragments/loading";
 import { ErrorMessage } from "@/components/fragments/error-message";
+import { useLeaderboardUsers } from "@/hooks/use-users";
 
 export default function LeaderboardPage() {
     const router = useRouter();
-    const { users, loading, error } = useLeaderboard();
+    const { users, loading, error } = useLeaderboardUsers();
+    console.log("Leaderboard users:", users);
 
     if (loading) return <Loading />;
 
-    if (error) return <ErrorMessage message={error} onRetry={() => window.location.reload()} />
+    if (error) return <ErrorMessage message={error} />
 
     const topThree = users.slice(0, 3);
 

@@ -16,12 +16,13 @@ import { PROFILE_FORM_DEFAULTS } from "@/lib/constants/form";
 import { profileSchema } from "@/lib/validation/user";
 import { useUserProfile } from "@/hooks/use-users";
 import { toast } from "sonner";
+import { getBadgeByCategory } from "@/lib/utils/badge";
 
 export default function PublicProfilePage() {
     const { username } = useParams();
     const router = useRouter();
     const { data: session } = useSession();
-    const { profile, loading, error, refetch } = useUserProfile(session?.user?.id);
+    const { profile, loading, error, refetch } = useUserProfile(username);
 
     const {
         register,
@@ -32,6 +33,13 @@ export default function PublicProfilePage() {
         resolver: zodResolver(profileSchema),
         defaultValues: PROFILE_FORM_DEFAULTS,
     });
+
+    const badges = profile?.categories
+        .map((category) =>
+            getBadgeByCategory(category.category_slug, category.post_count)
+        )
+        .filter(Boolean);
+    console.log("Badges:", badges);
 
     const [activeTab, setActiveTab] = useState("posts");
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -132,13 +140,16 @@ export default function PublicProfilePage() {
                         errors={errors}
                         updateLoading={updateLoading}
                         onSubmit={onSubmit}
-                        session={session?.user}
+                        userId={session?.user?.id}
+                        most_contribution={profile.most_contribution}
+                        badges={badges}
                     />
                     <ProfileTabs
                         activeTab={activeTab}
                         setActiveTab={setActiveTab}
-                        posts={profile.postsData}
+                        posts={profile.posts}
                         userId={profile?.user?.id}
+                        isOwner={session?.user?.id === profile.user.id}
                     />
                 </motion.div>
 

@@ -1,4 +1,3 @@
-// api/posts/[id]/like/route.js
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { likesService } from "@/lib/supabase/likes";

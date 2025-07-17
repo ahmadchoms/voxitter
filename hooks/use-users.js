@@ -163,7 +163,7 @@ export function useUserSearch(searchTerm) {
   };
 }
 
-export function useTopUsers(limit = 10) {
+export function useLeaderboardUsers(limit = 10) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -171,13 +171,14 @@ export function useTopUsers(limit = 10) {
   const fetchTopUsers = useCallback(async () => {
     try {
       setLoading(true);
-      const result = await usersService.getTopUsers(limit);
+      const result = await fetch(`/api/leaderboard?limit=${limit}`);
+      const data = await result.json();
 
-      if (result.error) {
-        throw new Error(result.error);
+      if (!result.ok) {
+        throw new Error(data.error || "Failed to fetch top users");
       }
 
-      setUsers(result.data || []);
+      setUsers(data || []);
       setError(null);
     } catch (err) {
       setError(err.message);
@@ -198,17 +199,17 @@ export function useTopUsers(limit = 10) {
   };
 }
 
-export function useUserProfile(userId) {
+export function useUserProfile(username) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const fetchProfile = useCallback(async () => {
-    if (!userId) return;
+    if (!username) return;
 
     try {
       setLoading(true);
-      const res = await fetch(`/api/users/${userId}/profile`);
+      const res = await fetch(`/api/users/${username}/profile`);
       const data = await res.json();
 
       if (!res.ok) {
@@ -223,17 +224,17 @@ export function useUserProfile(userId) {
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, [username]);
 
   useEffect(() => {
-    if (userId) {
+    if (username) {
       fetchProfile();
     } else {
       setProfile(null);
       setLoading(false);
       setError(null);
     }
-  }, [userId, fetchProfile]);
+  }, [username, fetchProfile]);
 
   return {
     profile,

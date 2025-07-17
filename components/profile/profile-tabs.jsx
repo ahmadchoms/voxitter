@@ -13,6 +13,7 @@ export function ProfileTabs({
     setActiveTab,
     posts,
     userId,
+    isOwner = false,
 }) {
     const { posts: likedPosts, error: likeError, loading: likeLoading } = usePostsByLike(userId);
     const { posts: bookmarkPosts, error: bookmarkError, loading: bookmarkLoading } = usePostsByBookmark(userId);
@@ -34,20 +35,24 @@ export function ProfileTabs({
                         <FileText className="w-4 h-4" />
                         Postingan
                     </TabsTrigger>
-                    <TabsTrigger
-                        value="likes"
-                        className="flex items-center gap-2 data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-400"
-                    >
-                        <Heart className="w-4 h-4" />
-                        Disukai
-                    </TabsTrigger>
-                    <TabsTrigger
-                        value="bookmarks"
-                        className="flex items-center gap-2 data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-400"
-                    >
-                        <Bookmark className="w-4 h-4" />
-                        Disimpan
-                    </TabsTrigger>
+                    {isOwner && (
+                        <>
+                            <TabsTrigger
+                                value="likes"
+                                className="flex items-center gap-2 data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-400"
+                            >
+                                <Heart className="w-4 h-4" />
+                                Disukai
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="bookmarks"
+                                className="flex items-center gap-2 data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-400"
+                            >
+                                <Bookmark className="w-4 h-4" />
+                                Disimpan
+                            </TabsTrigger>
+                        </>
+                    )}
                 </TabsList>
 
                 <div className="mt-6">
@@ -78,71 +83,75 @@ export function ProfileTabs({
                         )}
                     </TabsContent>
 
-                    <TabsContent value="likes" className="max-h-[calc(100vh-250px)] overflow-y-auto pr-4">
-                        {likeLoading && likedPosts.length === 0 ? (
-                            <Loading />
-                        ) : (
-                            <div className="space-y-4">
-                                {likedPosts.length > 0 ? (
-                                    likedPosts.map((post, index) => (
-                                        <motion.div
-                                            key={post.id}
-                                            initial={{ opacity: 0, y: 20 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ duration: 0.3, delay: index * 0.1 }}
-                                        >
-                                            <Feed post={post} />
-                                        </motion.div>
-                                    ))
+                    {isOwner && (
+                        <>
+                            <TabsContent value="likes" className="max-h-[calc(100vh-250px)] overflow-y-auto pr-4">
+                                {likeLoading && likedPosts.length === 0 ? (
+                                    <Loading />
                                 ) : (
-                                    <Card className="bg-gray-900 border-gray-700">
-                                        <CardContent className="p-8 text-center">
-                                            <Heart className="w-12 h-12 text-gray-500 mx-auto mb-4" />
-                                            <h3 className="font-semibold mb-2 text-white">
-                                                Belum ada postingan yang disukai
-                                            </h3>
-                                            <p className="text-gray-400">
-                                                Konten yang Anda suka akan muncul di sini
-                                            </p>
-                                        </CardContent>
-                                    </Card>
+                                    <div className="space-y-4">
+                                        {likedPosts.length > 0 ? (
+                                            likedPosts.map((post, index) => (
+                                                <motion.div
+                                                    key={post.id}
+                                                    initial={{ opacity: 0, y: 20 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                                                >
+                                                    <Feed post={post} />
+                                                </motion.div>
+                                            ))
+                                        ) : (
+                                            <Card className="bg-gray-900 border-gray-700">
+                                                <CardContent className="p-8 text-center">
+                                                    <Heart className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+                                                    <h3 className="font-semibold mb-2 text-white">
+                                                        Belum ada postingan yang disukai
+                                                    </h3>
+                                                    <p className="text-gray-400">
+                                                        Konten yang Anda suka akan muncul di sini
+                                                    </p>
+                                                </CardContent>
+                                            </Card>
+                                        )}
+                                    </div>
                                 )}
-                            </div>
-                        )}
-                    </TabsContent>
+                            </TabsContent>
 
-                    <TabsContent value="bookmarks" className="max-h-[calc(100vh-250px)] overflow-y-auto pr-4 space-y-4">
-                        {bookmarkLoading && bookmarkPosts.length === 0 ? (
-                            <Loading />
-                        ) : (
-                            <div className="space-y-4">
-                                {bookmarkPosts.length > 0 ? (
-                                    bookmarkPosts.map((post, index) => (
-                                        <motion.div
-                                            key={post.id}
-                                            initial={{ opacity: 0, y: 20 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ duration: 0.3, delay: index * 0.1 }}
-                                        >
-                                            <Feed post={post} />
-                                        </motion.div>
-                                    ))
+                            <TabsContent value="bookmarks" className="max-h-[calc(100vh-250px)] overflow-y-auto pr-4 space-y-4">
+                                {bookmarkLoading && bookmarkPosts.length === 0 ? (
+                                    <Loading />
                                 ) : (
-                                    <Card className="bg-gray-900 border-gray-700">
-                                        <CardContent className="p-8 text-center">
-                                            <Bookmark className="w-12 h-12 text-gray-500 mx-auto mb-4" />
-                                            <h3 className="font-semibold mb-2 text-white">
-                                                Belum ada postingan yang disimpan
-                                            </h3>
-                                            <p className="text-gray-400">
-                                                Konten yang Anda simpan akan muncul di sini
-                                            </p>
-                                        </CardContent>
-                                    </Card>
+                                    <div className="space-y-4">
+                                        {bookmarkPosts.length > 0 ? (
+                                            bookmarkPosts.map((post, index) => (
+                                                <motion.div
+                                                    key={post.id}
+                                                    initial={{ opacity: 0, y: 20 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                                                >
+                                                    <Feed post={post} />
+                                                </motion.div>
+                                            ))
+                                        ) : (
+                                            <Card className="bg-gray-900 border-gray-700">
+                                                <CardContent className="p-8 text-center">
+                                                    <Bookmark className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+                                                    <h3 className="font-semibold mb-2 text-white">
+                                                        Belum ada postingan yang disimpan
+                                                    </h3>
+                                                    <p className="text-gray-400">
+                                                        Konten yang Anda simpan akan muncul di sini
+                                                    </p>
+                                                </CardContent>
+                                            </Card>
+                                        )}
+                                    </div>
                                 )}
-                            </div>
-                        )}
-                    </TabsContent>
+                            </TabsContent>
+                        </>
+                    )}
                 </div>
             </Tabs>
         </motion.div>

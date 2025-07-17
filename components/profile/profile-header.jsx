@@ -12,7 +12,9 @@ export const ProfileHeader = ({
     errors,
     updateLoading,
     onSubmit,
-    session,
+    userId,
+    most_contribution,
+    badges,
 }) => {
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleDateString("id-ID", {
@@ -67,7 +69,7 @@ export const ProfileHeader = ({
                             </div>
                         </div>
 
-                        {session.id === user.id && (
+                        {userId === user.id && (
                             <EditProfileDialog
                                 user={user}
                                 isEditDialogOpen={isEditDialogOpen}
@@ -87,39 +89,84 @@ export const ProfileHeader = ({
                         </p>
                     </div>
 
-                    <div className="flex items-center gap-4 flex-wrap">
-                        {user.points >= 5000 && (
-                            <div className="px-3 py-1 bg-yellow-500/20 border border-yellow-500/30 text-yellow-300 rounded-full text-xs font-medium">
-                                High Achiever
-                            </div>
-                        )}
-                        {user.is_verified && (
-                            <div className="px-3 py-1 bg-blue-500/20 border border-blue-500/30 text-blue-300 rounded-full text-xs font-medium">
-                                Verified User
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-4 flex-wrap">
+                            {user.points >= 5000 && (
+                                <div className="px-4 py-2 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border border-yellow-500/30 text-yellow-300 rounded-full text-sm font-medium backdrop-blur-sm shadow-lg shadow-yellow-500/20">
+                                    <Trophy className="w-4 h-4 inline mr-2" />
+                                    High Achiever
+                                </div>
+                            )}
+                            {user.is_verified && (
+                                <div className="px-4 py-2 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-500/30 text-blue-300 rounded-full text-sm font-medium backdrop-blur-sm shadow-lg shadow-blue-500/20">
+                                    <BadgeCheck className="w-4 h-4 inline mr-2" />
+                                    Verified User
+                                </div>
+                            )}
+                        </div>
+
+                        {badges.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                                {badges.map((badge, index) => (
+                                    <div
+                                        key={index}
+                                        className={`
+                                                relative px-4 py-2 rounded-full text-sm font-semibold
+                                                ${badge.backgroundColor} ${badge.textColor}
+                                                border ${badge.borderColor}
+                                                shadow-lg ${badge.glow}
+                                                backdrop-blur-sm
+                                                transition-all duration-300 
+                                                hover:scale-105 hover:shadow-xl
+                                                transform hover:-translate-y-0.5
+                                                group cursor-pointer
+                                            `}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-lg group-hover:animate-pulse">
+                                                {badge.emoji}
+                                            </span>
+                                            <span className="font-bold tracking-wide">
+                                                {badge.name}
+                                            </span>
+                                        </div>
+
+                                    </div>
+                                ))}
                             </div>
                         )}
                     </div>
 
-                    <div className="flex justify-around items-center py-2 bg-gray-800/70 rounded-2xl backdrop-blur-sm">
-                        <div className="text-center space-y-2">
-                            <div className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                    <div className="flex justify-around items-center py-4 bg-gradient-to-r from-gray-800/70 to-gray-900/70 rounded-2xl backdrop-blur-sm border border-gray-700/50 shadow-lg">
+                        <div className="text-center space-y-2 group cursor-pointer">
+                            <div className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent group-hover:from-blue-300 group-hover:to-purple-300 transition-all duration-300">
                                 {user.posts_count}
                             </div>
-                            <div className="text-sm text-gray-400 font-medium">Postingan</div>
+                            <div className="text-sm text-gray-400 font-medium group-hover:text-gray-300 transition-colors">
+                                Postingan
+                            </div>
                         </div>
 
-                        <div className="text-center space-y-2">
-                            <div className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+                        <div className="w-px h-12 bg-gradient-to-b from-transparent via-gray-600 to-transparent"></div>
+
+                        <div className="text-center space-y-2 group cursor-pointer">
+                            <div className="text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent group-hover:from-green-300 group-hover:to-emerald-300 transition-all duration-300">
                                 {user.points.toLocaleString()}
                             </div>
-                            <div className="text-sm text-gray-400 font-medium">Poin</div>
+                            <div className="text-sm text-gray-400 font-medium group-hover:text-gray-300 transition-colors">
+                                Poin
+                            </div>
                         </div>
 
-                        <div className="text-center space-y-2">
-                            <div className="text-2xl font-bold bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">
-                                Pendidikan
+                        <div className="w-px h-12 bg-gradient-to-b from-transparent via-gray-600 to-transparent"></div>
+
+                        <div className="text-center space-y-2 group cursor-pointer">
+                            <div className="text-3xl font-bold bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent group-hover:from-pink-300 group-hover:to-rose-300 transition-all duration-300">
+                                {most_contribution}
                             </div>
-                            <div className="text-sm text-gray-400 font-medium">Kontribusi Terbanyak</div>
+                            <div className="text-sm text-gray-400 font-medium group-hover:text-gray-300 transition-colors">
+                                Kontribusi Terbanyak
+                            </div>
                         </div>
                     </div>
                 </div>
