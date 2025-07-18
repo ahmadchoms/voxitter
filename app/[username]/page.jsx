@@ -39,7 +39,6 @@ export default function PublicProfilePage() {
             getBadgeByCategory(category.category_slug, category.post_count)
         )
         .filter(Boolean);
-    console.log("Badges:", badges);
 
     const [activeTab, setActiveTab] = useState("posts");
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);

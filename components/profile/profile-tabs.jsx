@@ -76,7 +76,7 @@ export function ProfileTabs({
                                         Belum ada postingan
                                     </h3>
                                     <p className="text-gray-400">
-                                        Postingan pengguna akan muncul di sini
+                                        Buat postingan pertama Anda!
                                     </p>
                                 </CardContent>
                             </Card>

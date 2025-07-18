@@ -7,6 +7,8 @@ import {
     User,
     LogOut,
     Search,
+    LayoutGrid,
+    TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -35,6 +37,14 @@ export function SidebarNavigation({
             title: "Leaderboard",
             icon: Trophy,
             href: "/leaderboard",
+        },
+        {
+            title: "Kategori",
+            icon: LayoutGrid,
+        },
+        {
+            title: "Trending",
+            icon: TrendingUp,
         },
         {
             title: "Buat",

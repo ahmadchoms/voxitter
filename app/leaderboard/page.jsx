@@ -14,7 +14,6 @@ import { useLeaderboardUsers } from "@/hooks/use-users";
 export default function LeaderboardPage() {
     const router = useRouter();
     const { users, loading, error } = useLeaderboardUsers();
-    console.log("Leaderboard users:", users);
 
     if (loading) return <Loading />;
 

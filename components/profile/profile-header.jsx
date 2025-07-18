@@ -140,7 +140,7 @@ export const ProfileHeader = ({
                     <div className="flex justify-around items-center py-4 bg-gradient-to-r from-gray-800/70 to-gray-900/70 rounded-2xl backdrop-blur-sm border border-gray-700/50 shadow-lg">
                         <div className="text-center space-y-2 group cursor-pointer">
                             <div className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent group-hover:from-blue-300 group-hover:to-purple-300 transition-all duration-300">
-                                {user.posts_count}
+                                {user.post_count}
                             </div>
                             <div className="text-sm text-gray-400 font-medium group-hover:text-gray-300 transition-colors">
                                 Postingan
@@ -162,7 +162,7 @@ export const ProfileHeader = ({
 
                         <div className="text-center space-y-2 group cursor-pointer">
                             <div className="text-3xl font-bold bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent group-hover:from-pink-300 group-hover:to-rose-300 transition-all duration-300">
-                                {most_contribution}
+                                {most_contribution || "-"}
                             </div>
                             <div className="text-sm text-gray-400 font-medium group-hover:text-gray-300 transition-colors">
                                 Kontribusi Terbanyak

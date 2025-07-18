@@ -16,7 +16,7 @@ export async function GET(request) {
     if (userId) {
       result = await postsService.getPostsByUser(userId, offset, limit);
     } else if (categoryId) {
-      result = await postsService.getPostsByCategory(categoryId, offset, limit);
+      result = await postsService.getPostsByCategory(categoryId, offset, limit, userId);
     } else {
       result = await postsService.getPosts(offset, limit, viewerId);
     }
@@ -40,7 +40,30 @@ export async function POST(request) {
     const body = await request.json();
     const validatedData = postSchema.parse(body);
 
-    const result = await postsService.createPost(validatedData);
+    if (!validatedData.success) {
+      return NextResponse.json(
+        {
+          errors: validatedData.error.errors.flatten().fieldErrors,
+        },
+        { status: 400 }
+      );
+    }
+
+    const { user_id, content, category_ids, image_urls } = validatedData.data;
+
+    if (!user_id) {
+      return NextResponse.json(
+        { error: "User ID is required" },
+        { status: 400 }
+      );
+    }
+
+    const result = await postsService.createPost({
+      user_id,
+      content,
+      category_ids,
+      image_urls,
+    });
 
     if (result.error) {
       return NextResponse.json({ error: result.error }, { status: 500 });

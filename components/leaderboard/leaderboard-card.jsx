@@ -156,7 +156,7 @@ export const LeaderboardCard = ({
                             <div className="flex items-center gap-3 text-xs text-slate-500">
                                 <span className="flex items-center gap-1">
                                     <Award className="w-3 h-3" />
-                                    {user.posts_count} posts
+                                    {user.post_count} posts
                                 </span>
                                 <span>•</span>
                                 <span>{user.most_contributions}</span>

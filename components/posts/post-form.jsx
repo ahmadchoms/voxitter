@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
@@ -13,7 +13,6 @@ import { POST_FORM_DEFAULTS } from "@/lib/constants/form";
 import { useImagePreviews } from "@/hooks/use-image-preview";
 import { ImageUploadStep } from "./post-form/steps/image-upload-step";
 import { ContentStep } from "./post-form/steps/content-step";
-import { CategoriesStep } from "./post-form/steps/categories-step";
 import { PreviewStep } from "./post-form/steps/preview-step";
 import { NavigationButtons } from "./post-form/navigation-button";
 
@@ -31,6 +30,40 @@ export function PostForm({ onClose }) {
     const { register, handleSubmit, watch, setValue, control, formState: { errors, isSubmitting } } = form;
     const [imageFiles, content, categoryIds] = watch(["image_files", "content", "category_ids"]);
     const imagePreviews = useImagePreviews(imageFiles);
+
+    const [aiCategoriesLoading, setAiCategoriesLoading] = useState(false);
+    const [aiCategoriesError, setAiCategoriesError] = useState(null);
+
+    const generateCategoriesWithAI = useCallback(async () => {
+        if (content.trim().length === 0 || categoriesLoading) {
+            setValue("category_ids", []);
+            return;
+        }
+
+        setAiCategoriesLoading(true);
+        setAiCategoriesError(null);
+        try {
+            const response = await fetch('/api/ai/categories', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content }),
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to auto-generate categories');
+            }
+            const suggestedCategoryIds = await response.json();
+            setValue("category_ids", suggestedCategoryIds);
+            toast.success("Kategori otomatis terdeteksi!");
+        } catch (error) {
+            console.error("Error auto-generating categories:", error);
+            setAiCategoriesError(error.message);
+            setValue("category_ids", []);
+            toast.error(`Gagal mendeteksi kategori: ${error.message}`);
+        } finally {
+            setAiCategoriesLoading(false);
+        }
+    }, [content, categoriesLoading, setValue]);
 
     const handleImageUpload = useCallback((e) => {
         const files = Array.from(e.target.files || []);
@@ -63,15 +96,21 @@ export function PostForm({ onClose }) {
                 return;
             }
 
-            const imageUrls = data.image_files?.length
-                ? await uploadImages(data.image_files, userId)
-                : [];
+            if (content.trim().length > 0 && (!categoryIds || categoryIds.length === 0)) {
+                await generateCategoriesWithAI();
+                if (!form.getValues('category_ids') || form.getValues('category_ids').length === 0) {
+                    toast.error("Kategori belum terdeteksi. Silakan coba lagi atau sesuaikan konten.");
+                    return;
+                }
+            }
+
+            const imageUrls = data.image_files?.length ? await uploadImages(data.image_files, userId) : [];
 
             const postData = {
                 user_id: userId,
-                content: data.content,
-                category_ids: data.category_ids,
+                content,
                 image_urls: imageUrls,
+                category_ids: form.getValues('category_ids'),
             };
 
             const response = await fetch("/api/posts", {
@@ -94,14 +133,17 @@ export function PostForm({ onClose }) {
     };
 
     const navigation = {
-        nextStep: () => setStep((prev) => Math.min(prev + 1, STEPS.PREVIEW)),
+        nextStep: async () => {
+            if (step === STEPS.CONTENT) {
+                await generateCategoriesWithAI();
+            }
+            setStep((prev) => Math.min(prev + 1, STEPS.PREVIEW));
+        },
         prevStep: () => setStep((prev) => Math.max(prev - 1, STEPS.IMAGES)),
         canGoNext: () => {
             switch (step) {
                 case STEPS.CONTENT:
                     return content.trim().length > 0;
-                case STEPS.CATEGORIES:
-                    return categoryIds.length > 0;
                 default:
                     return true;
             }
@@ -128,31 +170,28 @@ export function PostForm({ onClose }) {
                         content={content}
                         errors={errors}
                         isSubmitting={isSubmitting}
-                    />
-                );
-            case STEPS.CATEGORIES:
-                return (
-                    <CategoriesStep
-                        categories={categories}
-                        control={control}
-                        errors={errors}
-                        isSubmitting={isSubmitting}
-                        loading={categoriesLoading}
+                        aiCategoriesLoading={aiCategoriesLoading}
+                        aiCategoriesError={aiCategoriesError}
                     />
                 );
             case STEPS.PREVIEW:
+                const selectedCategoriesForPreview = categories.filter((c) => categoryIds?.includes(c.id));
                 return (
                     <PreviewStep
                         session={session}
                         content={content}
-                        categories={categories.filter((c) => categoryIds.includes(c.id))}
+                        categories={selectedCategoriesForPreview}
                         imagePreviews={imagePreviews}
                     />
                 );
             default:
                 return null;
         }
-    }, [step, handleImageUpload, imagePreviews, imageFiles, removeImage, errors, isSubmitting, register, content, categories, control, categoriesLoading, session, categoryIds]);
+    }, [
+        step, handleImageUpload, imagePreviews, imageFiles, removeImage, errors, isSubmitting,
+        register, content, categories, control, categoriesLoading, session, categoryIds,
+        aiCategoriesLoading, aiCategoriesError
+    ]);
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 mt-4">

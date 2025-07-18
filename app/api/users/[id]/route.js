@@ -1,40 +1,31 @@
 import { NextResponse } from "next/server";
 import { usersService } from "@/lib/supabase/users";
-import { postsService } from "@/lib/supabase/posts";
 import { updateUserSchema } from "@/lib/validation/user";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 
-export async function GET(request, context) {
-  const { params } = context;
-  const username = params.id;
+export async function GET(request, { params }) {
+  const { searchTerm, offset = 0, limit = 25 } = request.query;
+
+  if (!searchTerm) {
+    return NextResponse.json(
+      { error: "Search term is required" },
+      { status: 400 }
+    );
+  }
+
   try {
-    if (!username) {
-      return NextResponse.json(
-        { error: "Username is required" },
-        { status: 400 }
-      );
+    const { data, error } = await usersService.searchUsers(
+      searchTerm,
+      parseInt(offset),
+      parseInt(limit)
+    );
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
-
-    const userRes = await usersService.getUserByUsername(username);
-
-    if (userRes.error || !userRes.data) {
-      return NextResponse.json(
-        { error: userRes.error || "User not found" },
-        { status: 404 }
-      );
-    }
-
-    const postRes = await postsService.getPostsByUser(userRes.data.id);
-
-    if (postRes.error) {
-      return NextResponse.json({ error: postRes.error }, { status: 500 });
-    }
-
-    return NextResponse.json({
-      user: userRes.data,
-      posts: postRes.data,
-    });
+    
+    return NextResponse.json(data, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   }

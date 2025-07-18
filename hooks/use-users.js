@@ -46,13 +46,15 @@ export function useUser(userId) {
   const fetchUser = useCallback(async () => {
     try {
       setLoading(true);
-      const result = await usersService.getUserById(userId);
+      const result = await fetch(`/api/users/${userId}`);
 
-      if (result.error) {
-        throw new Error(result.error);
+      const data = await result.json();
+
+      if (!result.ok) {
+        throw new Error(data.error || "Failed to fetch user");
       }
-
-      setUser(result.data);
+      
+      setUser(data);
       setError(null);
     } catch (err) {
       setError(err.message);
@@ -72,51 +74,6 @@ export function useUser(userId) {
     loading,
     error,
     refetch: fetchUser,
-  };
-}
-
-export function useUsername(username) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  const fetchUsername = useCallback(async () => {
-    if (!username) return;
-
-    try {
-      setLoading(true);
-      const res = await fetch(`/api/users/${username}`);
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to fetch user");
-      }
-
-      setUser(data);
-      setError(null);
-    } catch (err) {
-      setError(err.message);
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [username]);
-
-  useEffect(() => {
-    if (username) {
-      fetchUsername();
-    } else {
-      setUser(null);
-      setLoading(false);
-      setError(null);
-    }
-  }, [username, fetchUsername]);
-
-  return {
-    user,
-    loading,
-    error,
-    refetch: fetchUsername,
   };
 }
 

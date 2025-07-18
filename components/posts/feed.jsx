@@ -207,7 +207,7 @@ export default function Feed({ post }) {
                                 trigger={
                                     <FeedButton
                                         icon={MessageCircle}
-                                        count={post.comments_count}
+                                        count={post.comment_count}
                                         isActive={false}
                                         activeColor="text-blue-500"
                                         hoverColor="text-blue-400"
