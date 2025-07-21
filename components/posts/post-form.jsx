@@ -43,7 +43,7 @@ export function PostForm({ onClose }) {
         setAiCategoriesLoading(true);
         setAiCategoriesError(null);
         try {
-            const response = await fetch('/api/ai/categories', {
+            const response = await fetch('/api/ai/post/categories', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ content }),

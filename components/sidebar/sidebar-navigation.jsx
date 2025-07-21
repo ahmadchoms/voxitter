@@ -41,10 +41,12 @@ export function SidebarNavigation({
         {
             title: "Kategori",
             icon: LayoutGrid,
+            href: "/categories",
         },
         {
             title: "Trending",
             icon: TrendingUp,
+            href: "/trending",
         },
         {
             title: "Buat",

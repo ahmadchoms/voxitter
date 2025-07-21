@@ -62,7 +62,7 @@ export default function PublicProfilePage() {
 
         setUpdateLoading(true);
         try {
-            const response = await fetch(`/api/users/${session.user.id}`, {
+            const response = await fetch(`/api/users/${session.user.id}/profile`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -75,7 +75,6 @@ export default function PublicProfilePage() {
                 throw new Error(errorData.error || "Gagal memperbarui profil");
             }
 
-            const updatedProfile = await response.json();
             toast.success("Profil berhasil diperbarui!");
 
             refetch();

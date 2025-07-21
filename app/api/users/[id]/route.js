@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { usersService } from "@/lib/supabase/users";
-import { updateUserSchema } from "@/lib/validation/user";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
+import { updateProfileSchema } from "@/lib/validation/user";
 
-export async function GET(request, { params }) {
+export async function GET(request) {
   const { searchTerm, offset = 0, limit = 25 } = request.query;
 
   if (!searchTerm) {
@@ -41,7 +41,7 @@ export async function PUT(request, context) {
 
   try {
     const body = await request.json();
-    const validatedData = updateUserSchema.parse(body);
+    const validatedData = updateProfileSchema.parse(body);
 
     const result = await usersService.updateUser(params.id, validatedData);
 
