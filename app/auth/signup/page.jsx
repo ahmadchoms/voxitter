@@ -14,6 +14,7 @@ import { LOADING_STATES } from "@/lib/constants/auth";
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "@/lib/constants/message";
 import { SIGNUP_FORM_DEFAULTS } from "@/lib/constants/form";
 import { signUpSchema } from "@/lib/validation/auth";
+import { sanitizeUsername } from "@/lib/utils/format";
 
 export default function SignUpPage() {
     const [loading, setLoading] = useState(LOADING_STATES.NONE);

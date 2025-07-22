@@ -1,5 +1,6 @@
 "use client";
 
+import { USERNAME_CHECK_DELAY } from "@/lib/constants/auth";
 import { usersService } from "@/lib/supabase/users";
 import { useCallback, useEffect, useState } from "react";
 
