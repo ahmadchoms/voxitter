@@ -67,14 +67,14 @@ export function SidebarNavigation({
     };
 
     return (
-        <div className="w-20 md:w-72 h-full bg-gray-900 border-r border-gray-800 flex flex-col relative overflow-hidden">
+        <div className="w-20 md:w-72 h-full bg-gray-900 border-r border-gray-800 flex flex-col overflow-hidden">
             <motion.div
-                className="p-6 border-b border-gray-800/50 relative z-10"
+                className="p-6 border-b border-gray-800/50"
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
             >
-                <div className="flex items-center justify-center md:gap-3">
+                <Link href="/" className="flex items-center justify-center md:gap-3">
                     <h1 className="block md:hidden text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
                         V
                     </h1>
@@ -86,10 +86,10 @@ export function SidebarNavigation({
                             Social Discussion Platform
                         </p>
                     </div>
-                </div>
+                </Link>
             </motion.div>
 
-            <div className="flex-1 px-4 py-6 relative z-10">
+            <div className="flex-1 px-4 py-6">
                 <nav className="space-y-2">
                     {navigationItems.map((item, index) => (
                         <motion.div
@@ -101,7 +101,7 @@ export function SidebarNavigation({
                             {item.href ? (
                                 <Link href={item.href}>
                                     <motion.div
-                                        className={`group flex items-center gap-4 p-2.5 md:px-4 md:py-3.5 rounded-xl transition-all duration-200 cursor-pointer relative overflow-hidden ${item.href == pathname
+                                        className={`group flex items-center gap-4 p-2.5 md:px-4 md:py-3.5 rounded-xl transition-all duration-200 cursor-pointer overflow-hidden ${item.href == pathname
                                             ? "bg-gradient-to-r from-blue-600/20 to-purple-600/20 text-white border border-blue-500/30"
                                             : "text-gray-400 hover:text-white hover:bg-gray-800/50"
                                             }`}
@@ -124,7 +124,7 @@ export function SidebarNavigation({
                                 </Link>
                             ) : (
                                 <motion.div
-                                    className="group flex items-center gap-4 p-2.5 md:px-4 md:py-3.5 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all duration-200 cursor-pointer relative overflow-hidden"
+                                    className="group flex items-center gap-4 p-2.5 md:px-4 md:py-3.5 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all duration-200 cursor-pointer overflow-hidden"
                                     onClick={item.onClick}
                                     whileHover={{ scale: 1.02, x: 4 }}
                                     whileTap={{ scale: 0.98 }}
@@ -148,7 +148,7 @@ export function SidebarNavigation({
             <div className="h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent" />
 
             <motion.div
-                className="p-4 relative z-10"
+                className="p-4"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.5 }}
