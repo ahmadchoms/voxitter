@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { postsService } from "@/lib/supabase/posts";
-import { postSchema } from "@/lib/validation/post";
+import { postApiSchema } from "@/lib/validation/post";
 
 export async function GET(request) {
   try {
@@ -38,31 +38,22 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const validatedData = postSchema.parse(body);
+    const validationResult = postApiSchema.safeParse(body);
 
-    if (!validatedData.success) {
+    if (!validationResult.success) {
       return NextResponse.json(
-        {
-          errors: validatedData.error.errors.flatten().fieldErrors,
-        },
+        { errors: validationResult.error.flatten().fieldErrors },
         { status: 400 }
       );
     }
 
-    const { user_id, content, category_ids, image_urls } = validatedData.data;
-
-    if (!user_id) {
-      return NextResponse.json(
-        { error: "User ID is required" },
-        { status: 400 }
-      );
-    }
-
+    const { user_id, content, category_ids, image_urls } =
+      validationResult.data;
     const result = await postsService.createPost({
       user_id,
       content,
-      category_ids,
-      image_urls,
+      category_ids: category_ids || [],
+      image_urls: image_urls || [],
     });
 
     if (result.error) {
@@ -71,9 +62,8 @@ export async function POST(request) {
 
     return NextResponse.json(result.data, { status: 201 });
   } catch (error) {
-    console.error("Error creating post:", error);
     return NextResponse.json(
-      { error: "Failed to create post" },
+      { error: "Failed to create post due to an unexpected server error." },
       { status: 500 }
     );
   }

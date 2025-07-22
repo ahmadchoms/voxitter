@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { MAX_FILE_SIZE, MAX_IMAGES, STEPS } from "@/lib/constants/post";
 import { useCategories } from "@/hooks/use-categories";
 import { useImageUpload } from "@/hooks/use-image-upload";
-import { postSchema } from "@/lib/validation/post";
+import { postFormSchema } from "@/lib/validation/post";
 import { POST_FORM_DEFAULTS } from "@/lib/constants/form";
 import { useImagePreviews } from "@/hooks/use-image-preview";
 import { ImageUploadStep } from "./post-form/steps/image-upload-step";
@@ -23,7 +23,7 @@ export function PostForm({ onClose }) {
     const { uploadImages } = useImageUpload();
 
     const form = useForm({
-        resolver: zodResolver(postSchema),
+        resolver: zodResolver(postFormSchema),
         defaultValues: POST_FORM_DEFAULTS,
     });
 

@@ -1,5 +1,6 @@
 import { authOptions } from "@/lib/auth/options";
 import { usersService } from "@/lib/supabase/users";
+import { updateProfileSchema } from "@/lib/validation/user";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 

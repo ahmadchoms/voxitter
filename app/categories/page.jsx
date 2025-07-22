@@ -73,7 +73,9 @@ export default function CategoriesPage() {
     const filteredPosts = useMemo(() => {
         if (!posts) return [];
         if (selectedCategory === 'Semua') return posts;
-        return posts.filter(post => post.category?.name === selectedCategory);
+        return posts.filter((post) =>
+            post.categories?.some((cat) => cat.name === selectedCategory)
+        );
     }, [posts, selectedCategory]);
 
     if (initialLoading || categoriesLoading) return <Loading />;

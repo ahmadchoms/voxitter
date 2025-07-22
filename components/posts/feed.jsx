@@ -128,50 +128,41 @@ export default function Feed({ post }) {
         >
             <Card className="bg-gray-900 border-gray-800 hover:border-gray-700 transition-all duration-200">
                 <CardHeader>
-                    <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-3">
-                            <Avatar className="border-2 border-gray-700">
-                                <AvatarFallback className="bg-gray-800 text-gray-200">
-                                    {post.user.full_name
-                                        .split(" ")
-                                        .map((n) => n[0])
-                                        .join("")}
-                                </AvatarFallback>
-                            </Avatar>
-                            <div>
-                                <div className="flex items-center gap-1">
-                                    <h3 className="font-semibold text-white">
-                                        {post.user.full_name}
-                                    </h3>
-                                    {post.user.is_verified && (
-                                        <BadgeCheck
-                                            className="w-5 h-5 text-white"
-                                            fill="blue"
-                                            stroke="white"
-                                        />
-                                    )}
-                                </div>
-                                <div className="flex items-center gap-2 text-sm text-gray-400">
-                                    <span>{post.user.username}</span>
-                                    <span>•</span>
-                                    <span>{formatDate(post.created_at)}</span>
-                                    <span>•</span>
-                                    <Badge
-                                        variant="outline"
-                                        className="text-xs border-gray-700 text-gray-400"
-                                    >
-                                        {post.user.points.toLocaleString()} poin
-                                    </Badge>
-                                </div>
+                    <div className="flex items-center gap-3">
+                        <Avatar className="border-2 border-gray-700">
+                            <AvatarFallback className="bg-gray-800 text-gray-200">
+                                {post.user.full_name
+                                    .split(" ")
+                                    .map((n) => n[0])
+                                    .join("")}
+                            </AvatarFallback>
+                        </Avatar>
+                        <div>
+                            <div className="flex items-center gap-1">
+                                <h3 className="font-semibold text-white max-w-40 truncate">
+                                    {post.user.full_name}
+                                </h3>
+                                {post.user.is_verified && (
+                                    <BadgeCheck
+                                        className="w-5 h-5 text-white"
+                                        fill="blue"
+                                        stroke="white"
+                                    />
+                                )}
+                            </div>
+                            <div className="flex items-center gap-1 text-sm text-gray-400">
+                                <span>{post.user.username}</span>
+                                <span>•</span>
+                                <span>{formatDate(post.created_at)}</span>
+                                <span className="hidden md:inline">•</span>
+                                <Badge
+                                    variant="outline"
+                                    className="text-xs border-gray-700 text-gray-400 hidden md:inline"
+                                >
+                                    {post.user.points.toLocaleString()} poin
+                                </Badge>
                             </div>
                         </div>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-gray-400 hover:text-white hover:bg-gray-800"
-                        >
-                            <MoreHorizontal className="w-4 h-4" />
-                        </Button>
                     </div>
                 </CardHeader>
 
@@ -198,7 +189,7 @@ export default function Feed({ post }) {
 
                 <CardFooter className="pt-3">
                     <div className="flex items-center justify-between w-full">
-                        <div className="flex items-center gap-6">
+                        <div className="flex items-center gap-2">
                             <FeedButton
                                 icon={Heart}
                                 isActive={isLiked}
@@ -228,7 +219,7 @@ export default function Feed({ post }) {
                             <motion.button
                                 onClick={handleBookmark}
                                 disabled={isBookmarkLoading}
-                                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-200 hover:bg-gray-800/50 ${isBookmarkLoading ? 'opacity-50 cursor-not-allowed' : ''
+                                className={`flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors duration-200 hover:bg-gray-800/50 ${isBookmarkLoading ? 'opacity-50 cursor-not-allowed' : ''
                                     }`}
                                 whileHover={{ scale: isBookmarkLoading ? 1 : 1.05 }}
                                 whileTap={{ scale: isBookmarkLoading ? 1 : 0.95 }}
