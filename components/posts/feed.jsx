@@ -1,9 +1,8 @@
-// components/Feed.jsx
 "use client";
 
 import { Card, CardContent, CardHeader, CardFooter } from "../ui/card";
 import { Avatar, AvatarFallback } from "../ui/avatar";
-import { BadgeCheck, Bookmark, Heart, MessageCircle, MoreHorizontal, Send } from "lucide-react";
+import { BadgeCheck, Bookmark, Heart, MessageCircle, Trash2 } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { motion } from "framer-motion"
@@ -12,17 +11,28 @@ import { FeedButton } from "./button-feed";
 import CommentDialog from "./comment-dialog";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "../ui/alert-dialog";
+import { postsService } from "@/lib/supabase/posts";
 
-export default function Feed({ post }) {
+export default function Feed({ post, refreshPosts }) {
     const { data: session } = useSession();
-
     const initialIsLiked = post.likes?.some(l => l.user_id === session?.user?.id && l.post_id === post.id) || false;
     const [isLiked, setIsLiked] = useState(initialIsLiked || post?.is_liked || false);
     const [isLikeLoading, setIsLikeLoading] = useState(false);
-
     const initialIsBookmarked = post.bookmarks?.some(b => b.user_id === session?.user?.id && b.post_id === post.id) || false;
     const [isBookmarked, setIsBookmarked] = useState(initialIsBookmarked || post?.is_bookmarked || false);
     const [isBookmarkLoading, setIsBookmarkLoading] = useState(false);
+    const [isDeleteLoading, setIsDeleteLoading] = useState(false);
 
     if (!post || !post.user) {
         return (
@@ -109,6 +119,30 @@ export default function Feed({ post }) {
         }
     };
 
+    const handleDelete = async () => {
+        if (!session || session.user.id !== post.user.id) {
+            alert("You can only delete your own posts.");
+            return;
+        }
+
+        setIsDeleteLoading(true);
+
+        try {
+            const result = await postsService.deletePost(post?.id);
+
+            if (result.error) {
+                throw new Error(result.error);
+            }
+
+            refreshPosts();
+        } catch (error) {
+            console.error("Error deleting post:", error);
+            throw new Error("Failed to delete post");
+        } finally {
+            setIsDeleteLoading(false);
+        }
+    };
+
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         const now = new Date();
@@ -137,23 +171,57 @@ export default function Feed({ post }) {
                                     .join("")}
                             </AvatarFallback>
                         </Avatar>
-                        <div>
-                            <div className="flex items-center gap-1">
-                                <h3 className="font-semibold text-white max-w-40 truncate">
-                                    {post.user.full_name}
-                                </h3>
-                                {post.user.is_verified && (
-                                    <BadgeCheck
-                                        className="w-5 h-5 text-white"
-                                        fill="blue"
-                                        stroke="white"
-                                    />
+                        <div className="w-full">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-1">
+                                    <h3 className="font-semibold text-white max-w-40 truncate">
+                                        {post.user.full_name}
+                                    </h3>
+                                    {post.user.is_verified && (
+                                        <BadgeCheck
+                                            className="w-5 h-5 text-white"
+                                            fill="blue"
+                                            stroke="white"
+                                        />
+                                    )}
+                                </div>
+                                {session?.user?.id === post.user.id && (
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="text-gray-400 hover:text-red-500"
+                                                disabled={isDeleteLoading}
+                                            >
+                                                <Trash2 className="w-5 h-5" />
+                                            </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent className="bg-gray-900 border-gray-800 text-white">
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle className="text-white">Apakah anda yakin?</AlertDialogTitle>
+                                                <AlertDialogDescription className="text-gray-400">
+                                                    Apakah anda yakin ingin menghapus post ini?
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel className="bg-gray-700 text-white hover:bg-gray-600 border-gray-600">Cancel</AlertDialogCancel>
+                                                <AlertDialogAction
+                                                    onClick={handleDelete}
+                                                    className="bg-red-600 text-white hover:bg-red-700"
+                                                    disabled={isDeleteLoading}
+                                                >
+                                                    {isDeleteLoading ? "Deleting..." : "Delete"}
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
                                 )}
                             </div>
                             <div className="flex items-center gap-1 text-sm text-gray-400">
                                 <span>{post.user.username}</span>
                                 <span>•</span>
-                                <span>{formatDate(post.created_at)}</span>
+                                <span className="text-xs">{formatDate(post.created_at)}</span>
                                 <span className="hidden md:inline">•</span>
                                 <Badge
                                     variant="outline"
@@ -164,22 +232,21 @@ export default function Feed({ post }) {
                             </div>
                         </div>
                     </div>
+
                 </CardHeader>
 
                 <CardContent>
                     <div className="space-y-3">
-                        <div className="flex gap-2 items-center">
-                            {post.categories.map((category) => {
-                                return (
-                                    <Badge
-                                        key={category.id}
-                                        variant="secondary"
-                                        className="mb-2 bg-gray-800 text-gray-200 border-gray-700"
-                                    >
-                                        {category.name}
-                                    </Badge>
-                                );
-                            })}
+                        <div className="flex flex-wrap gap-2 items-center">
+                            {post.categories.map((category) => (
+                                <Badge
+                                    key={category.id}
+                                    variant="secondary"
+                                    className="mb-2 bg-gray-800 text-gray-200 border-gray-700"
+                                >
+                                    {category.name}
+                                </Badge>
+                            ))}
                         </div>
                         <p className="text-gray-200 leading-relaxed">{post.content}</p>
                     </div>
@@ -212,15 +279,13 @@ export default function Feed({ post }) {
                                     />
                                 }
                             />
-
                         </div>
 
                         <div className="flex items-center">
                             <motion.button
                                 onClick={handleBookmark}
                                 disabled={isBookmarkLoading}
-                                className={`flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors duration-200 hover:bg-gray-800/50 ${isBookmarkLoading ? 'opacity-50 cursor-not-allowed' : ''
-                                    }`}
+                                className={`flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors duration-200 hover:bg-gray-800/50 ${isBookmarkLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 whileHover={{ scale: isBookmarkLoading ? 1 : 1.05 }}
                                 whileTap={{ scale: isBookmarkLoading ? 1 : 0.95 }}
                             >

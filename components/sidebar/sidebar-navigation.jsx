@@ -14,6 +14,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { signOut, useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
+import { useUserById } from "@/hooks/use-users";
 
 export function SidebarNavigation({
     onSearchClick,
@@ -21,6 +22,7 @@ export function SidebarNavigation({
 }) {
     const pathname = usePathname()
     const { data: session } = useSession();
+    const { user } = useUserById(session?.user?.id);
 
     const navigationItems = [
         {
@@ -56,7 +58,7 @@ export function SidebarNavigation({
         {
             title: "Profil",
             icon: User,
-            href: `/${session?.user.username}`,
+            href: `/${user?.username}`,
         },
     ];
 

@@ -122,12 +122,12 @@ export default function PublicProfilePage() {
 
     return (
         <MainLayout>
-            <div className="p-5 w-full">
+            <div className="p-2 w-full">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.1 }}
-                    className="space-y-8"
+                    className="space-y-2"
                 >
                     <ProfileHeader
                         user={profile.user}
@@ -148,6 +148,7 @@ export default function PublicProfilePage() {
                         posts={profile.posts}
                         userId={profile?.user?.id}
                         isOwner={session?.user?.id === profile.user.id}
+                        refreshPosts={refetch}
                     />
                 </motion.div>
 

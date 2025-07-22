@@ -38,6 +38,43 @@ export function useUsers() {
   };
 }
 
+export function useUserById(userId) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchUser = useCallback(async () => {
+    try {
+      setLoading(true);
+      const result = await usersService.getUserById(userId);
+
+      if (result.error) {
+        throw new Error(result.error);
+      }
+
+      setUser(result.data);
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    if (userId) {
+      fetchUser();
+    }
+  }, [fetchUser, userId]);
+
+  return {
+    user,
+    loading,
+    error,
+    refetch: fetchUser,
+  };
+}
+
 export function useUser(userId) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);

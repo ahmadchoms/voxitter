@@ -19,17 +19,16 @@ export default function Home() {
     hasMore,
     initialLoading,
   } = usePosts();
-  console.log("posts", posts);
 
   if (error) return <ErrorMessage message={error} onRetry={refreshPosts} />;
 
   return (
     <MainLayout>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-2">
+        <div className="lg:col-span-2 space-y-2">
           <AnimatePresence>
             {posts?.map((post) => (
-              <Feed key={post.id} post={post} />
+              <Feed key={post.id} post={post} refreshPosts={refreshPosts} />
             ))}
             {!initialLoading && hasMore && (
               <div className="flex justify-center">

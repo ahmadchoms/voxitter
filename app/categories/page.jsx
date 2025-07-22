@@ -209,7 +209,7 @@ export default function CategoriesPage() {
                     ) : filteredPosts && filteredPosts.length > 0 ? (
                         <div className="space-y-6">
                             {filteredPosts.map((post) => (
-                                <Feed key={post.id} post={post} />
+                                <Feed key={post.id} post={post} refreshPosts={refreshPosts} />
                             ))}
 
                             {hasMore && (
