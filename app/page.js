@@ -19,6 +19,7 @@ export default function Home() {
     hasMore,
     initialLoading,
   } = usePosts();
+  console.log("posts", posts);
 
   if (error) return <ErrorMessage message={error} onRetry={refreshPosts} />;
 

@@ -169,7 +169,7 @@ export default function CategoryPanel() {
                                         <span className="text-lg">{category.icon}</span>
                                         <div className="flex-1">
                                             <div className="flex items-center justify-between mb-2">
-                                                <h4 className="max-w-40 truncate font-semibold text-white text-sm leading-tight group-hover:text-blue-300 transition-colors duration-300">
+                                                <h4 className="max-w-36 truncate font-semibold text-white text-sm leading-tight group-hover:text-blue-300 transition-colors duration-300">
                                                     {category.name}
                                                 </h4>
                                                 <div className="flex items-center gap-2">

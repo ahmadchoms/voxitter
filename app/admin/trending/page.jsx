@@ -58,9 +58,9 @@ export default function TrendingAdminPage() {
         }
     }
 
-    const totalPages = Math.ceil(filteredTopics.length / itemsPerPage)
+    const totalPages = Math.ceil((filteredTopics?.length || 0) / itemsPerPage)
     const startIndex = (currentPage - 1) * itemsPerPage
-    const paginatedTopics = filteredTopics.slice(startIndex, startIndex + itemsPerPage)
+    const paginatedTopics = (filteredTopics || []).slice(startIndex, startIndex + itemsPerPage)
 
     if (loading) {
         return (

@@ -177,12 +177,19 @@ export default function Feed({ post }) {
 
                 <CardContent>
                     <div className="space-y-3">
-                        <Badge
-                            variant="secondary"
-                            className="mb-2 bg-gray-800 text-gray-200 border-gray-700"
-                        >
-                            {post.category && post.category.name}
-                        </Badge>
+                        <div className="flex gap-2 items-center">
+                            {post.categories.map((category) => {
+                                return (
+                                    <Badge
+                                        key={category.id}
+                                        variant="secondary"
+                                        className="mb-2 bg-gray-800 text-gray-200 border-gray-700"
+                                    >
+                                        {category.name}
+                                    </Badge>
+                                );
+                            })}
+                        </div>
                         <p className="text-gray-200 leading-relaxed">{post.content}</p>
                     </div>
                 </CardContent>
