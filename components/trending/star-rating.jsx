@@ -46,10 +46,12 @@ const StarRating = ({
                         : i === Math.floor(displayRating) && displayRating % 1 !== 0
                             ? (displayRating % 1) * 100
                             : 0;
+
                 return (
                     <div
                         key={i}
-                        className="relative inline-block cursor-pointer"
+                        className="relative inline-block"
+                        style={disabled ? {} : { cursor: 'pointer' }}
                         onMouseEnter={() => handleMouseEnter(i)}
                         onMouseLeave={handleMouseLeave}
                         onClick={() => handleStarClick(i + 1)}
@@ -73,9 +75,6 @@ const StarRating = ({
                     </div>
                 );
             })}
-            <span className="ml-1 text-sm font-medium text-gray-300">
-                {rating.toFixed(1)}
-            </span>
         </div>
     );
 };

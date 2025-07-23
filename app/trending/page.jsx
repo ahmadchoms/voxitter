@@ -12,7 +12,7 @@ import { useSession } from "next-auth/react";
 
 export default function TrendingPage() {
     const { data: session } = useSession();
-    const { allTopics, isLoading: topicsLoading, error: topicsError } = useTrendingTopics();
+    const { allTopics, isLoading: topicsLoading, error: topicsError } = useTrendingTopics(session?.user?.id);
     const [selectedCategory, setSelectedCategory] = useState('Semua');
     const { categories: allCategories, error: categoriesError, loading: categoriesLoading } = useCategories();
 

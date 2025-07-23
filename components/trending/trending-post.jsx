@@ -1,15 +1,14 @@
 "use client";
 
-import { useState } from "react";
 import { Clock, Star, Brain } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useTrendingTopics } from "@/hooks/use-trending";
 import StarRating from "./star-rating";
+import { toast } from "sonner";
 
 const TrendingPost = ({ topic, index, userId }) => {
     const { data: session } = useSession();
     const { rateTopic } = useTrendingTopics(userId);
-    const [isRatingLoading, setIsRatingLoading] = useState(false);
 
     const getCategoryColor = (category) => {
         const colors = {
@@ -37,15 +36,11 @@ const TrendingPost = ({ topic, index, userId }) => {
         return `${Math.floor(diffInMinutes / (24 * 60))}h`;
     };
 
-    const handleRate = async (newRating) => {
-        setIsRatingLoading(true);
-        const { success, error } = await rateTopic(topic.id, newRating);
+    const handleRate = async (rating) => {
+        const { error } = await rateTopic(topic.id, rating);
 
-        if (success) {
-            toast.success("Rating submitted successfully!");
-        } else {
-            toast.error("Failed to submit rating" + (error ? `: ${error}` : ""));
-        }
+        if (error) return toast.error(error.message);
+        toast.success("Rating berhasil disimpan!");
     };
 
     return (
@@ -95,15 +90,11 @@ const TrendingPost = ({ topic, index, userId }) => {
             <div className="flex items-center justify-between pt-4 border-t border-gray-800/50">
                 <div className="flex items-center gap-4">
                     <StarRating
-                        rating={parseFloat(topic.average_rating)}
-                        userRating={topic.userRating}
-                        onRate={(newRating) => handleRate(topic.id, newRating)}
+                        rating={topic.user_rating || 0}
+                        onRate={handleRate}
                         size={20}
                         disabled={!session}
                     />
-                    {isRatingLoading && (
-                        <span className="text-sm text-gray-500 animate-pulse">Submitting rating...</span>
-                    )}
                 </div>
             </div>
         </div>

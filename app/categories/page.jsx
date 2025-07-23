@@ -21,6 +21,7 @@ export default function CategoriesPage() {
         loadMorePosts,
         hasMore,
         initialLoading,
+        refreshPosts
     } = usePosts();
 
     const totalPosts = useMemo(() => {
@@ -78,6 +79,33 @@ export default function CategoriesPage() {
         );
     }, [posts, selectedCategory]);
 
+    // Function to get gradient color based on category
+    const getCategoryGradient = (categoryName, color) => {
+        if (categoryName === 'Semua') {
+            return 'from-blue-500 to-purple-600';
+        }
+
+        // Convert hex to HSL and create gradient variations
+        const colorMap = {
+            '#3B82F6': 'from-blue-500 to-blue-600',
+            '#8B5CF6': 'from-purple-500 to-purple-600',
+            '#10B981': 'from-green-500 to-green-600',
+            '#F59E0B': 'from-yellow-500 to-yellow-600',
+            '#EC4899': 'from-pink-500 to-pink-600',
+            '#EF4444': 'from-red-500 to-red-600',
+            '#06B6D4': 'from-cyan-500 to-cyan-600',
+            '#F97316': 'from-orange-500 to-orange-600',
+        };
+
+        return colorMap[color] || 'from-gray-500 to-gray-600';
+    };
+
+    // Function to calculate percentage for each category
+    const getCategoryPercentage = (postCount) => {
+        if (totalPosts === 0) return 0;
+        return (postCount / totalPosts) * 100;
+    };
+
     if (initialLoading || categoriesLoading) return <Loading />;
     if (categoriesError || postsError) return <ErrorMessage message={categoriesError || postsError} />;
 
@@ -97,6 +125,7 @@ export default function CategoriesPage() {
                 <p className="text-gray-400 text-lg">Jelajahi postingan berdasarkan kategori</p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                    {/* Semua Categories Button */}
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
@@ -134,7 +163,7 @@ export default function CategoriesPage() {
                                     </div>
                                     <div className="w-full bg-gray-700/50 rounded-full h-2 overflow-hidden">
                                         <motion.div
-                                            className="h-full rounded-full bg-gradient-to-r from-blue-500 to-purple-600"
+                                            className={`h-full rounded-full bg-gradient-to-r ${getCategoryGradient('Semua')}`}
                                             style={{ width: "100%" }}
                                             initial={{ width: 0 }}
                                             animate={{ width: "100%" }}
@@ -149,54 +178,67 @@ export default function CategoriesPage() {
                         </Button>
                     </motion.div>
 
-                    {categoriesWithColors.map((category, index) => (
-                        <motion.div
-                            key={category.name}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{
-                                duration: 0.4,
-                                delay: (index + 1) * 0.08,
-                                ease: [0.25, 0.4, 0.25, 1],
-                            }}
-                            whileHover={{
-                                scale: 1.01,
-                                transition: { duration: 0.2 },
-                            }}
-                        >
-                            <Button
-                                variant="link"
-                                onClick={() => setSelectedCategory(category.name)}
-                                className={`justify-start h-auto p-4 rounded-2xl transition-all duration-300 border group w-full ${selectedCategory === category.name
-                                    ? 'bg-gray-600/20 border-gray-500/50 shadow-lg'
-                                    : 'hover:bg-gray-700/40 border-transparent hover:border-gray-600/50'
-                                    }`}
+                    {/* Individual Category Buttons */}
+                    {categoriesWithColors.map((category, index) => {
+                        const percentage = getCategoryPercentage(category.post_count);
+
+                        return (
+                            <motion.div
+                                key={category.name}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{
+                                    duration: 0.4,
+                                    delay: (index + 1) * 0.08,
+                                    ease: [0.25, 0.4, 0.25, 1],
+                                }}
+                                whileHover={{
+                                    scale: 1.01,
+                                    transition: { duration: 0.2 },
+                                }}
                             >
-                                <div className="flex items-center gap-3 w-full">
-                                    <span className="text-lg">{getCategoryIcon(category.name)}</span>
-                                    <div className="flex-1">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <h4 className="max-w-40 truncate font-semibold text-white text-sm leading-tight group-hover:text-blue-300 transition-colors duration-300">
-                                                {category.name}
-                                            </h4>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-xs text-gray-400">
-                                                    {category.post_count.toLocaleString()}
-                                                </span>
-                                                {totalPosts > 0 ? (
-                                                    <span className="text-xs text-gray-500">
-                                                        ({((category.post_count / totalPosts) * 100).toFixed(1)}%)
+                                <Button
+                                    variant="link"
+                                    onClick={() => setSelectedCategory(category.name)}
+                                    className={`justify-start h-auto p-4 rounded-2xl transition-all duration-300 border group w-full ${selectedCategory === category.name
+                                        ? 'bg-gray-600/20 border-gray-500/50 shadow-lg'
+                                        : 'hover:bg-gray-700/40 border-transparent hover:border-gray-600/50'
+                                        }`}
+                                >
+                                    <div className="flex items-center gap-3 w-full">
+                                        <span className="text-lg">{getCategoryIcon(category.name)}</span>
+                                        <div className="flex-1">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <h4 className="max-w-40 truncate font-semibold text-white text-sm leading-tight group-hover:text-blue-300 transition-colors duration-300">
+                                                    {category.name}
+                                                </h4>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-xs text-gray-400">
+                                                        {category.post_count.toLocaleString()}
                                                     </span>
-                                                ) : (
-                                                    <span className="text-xs text-gray-500">(0%)</span>
-                                                )}
+                                                    <span className="text-xs text-gray-500">
+                                                        ({percentage.toFixed(1)}%)
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="w-full bg-gray-700/50 rounded-full h-2 overflow-hidden">
+                                                <motion.div
+                                                    className={`h-full rounded-full bg-gradient-to-r ${getCategoryGradient(category.name, category.color)}`}
+                                                    initial={{ width: 0 }}
+                                                    animate={{ width: `${percentage}%` }}
+                                                    transition={{
+                                                        duration: 1.2,
+                                                        delay: (index + 1) * 0.1,
+                                                        ease: [0.25, 0.4, 0.25, 1],
+                                                    }}
+                                                />
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </Button>
-                        </motion.div>
-                    ))}
+                                </Button>
+                            </motion.div>
+                        );
+                    })}
                 </div>
 
                 <div className="border-t border-gray-800/50 pt-6">

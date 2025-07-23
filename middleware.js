@@ -1,40 +1,46 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-const authRoutes = ["/auth/signin", "/auth/signup"];
-const adminPrefix = "/admin";
+const AUTH_ROUTES = ["/auth/signin", "/auth/signup"];
+const ADMIN_PREFIX = "/admin";
 
 export async function middleware(req) {
   const { pathname } = req.nextUrl;
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  const isAdminPath = pathname.startsWith(ADMIN_PREFIX);
+  const isAuthPath = AUTH_ROUTES.some((route) => pathname.startsWith(route));
+  const userIsAdmin = token?.role === "admin";
 
-  try {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-
-    if (!token && !authRoutes.some((route) => pathname.startsWith(route))) {
+  if (!token) {
+    if (isAdminPath || !isAuthPath) {
       const url = req.nextUrl.clone();
-      url.pathname = "/auth/signin";
+      url.pathname = AUTH_ROUTES[0];
       url.searchParams.set("callbackUrl", pathname);
       return NextResponse.redirect(url);
     }
+    return NextResponse.next();
+  }
 
-    if (token && authRoutes.some((route) => pathname.startsWith(route))) {
-      const url = req.nextUrl.clone();
-      url.pathname = token.role === "admin" ? "/admin" : "/";
-      return NextResponse.redirect(url);
-    }
+  if (isAuthPath) {
+    const url = req.nextUrl.clone();
+    url.pathname = userIsAdmin ? ADMIN_PREFIX : "/";
+    return NextResponse.redirect(url);
+  }
 
-    if (pathname.startsWith(adminPrefix) && token?.role !== "admin") {
+  if (isAdminPath) {
+    if (!userIsAdmin) {
       const url = req.nextUrl.clone();
       url.pathname = "/";
       return NextResponse.redirect(url);
     }
-
     return NextResponse.next();
-  } catch (error) {
-    console.error("Error in middleware:", error);
-    const url = req.nextUrl.clone();
-    url.pathname = "/auth/signin";
-    return NextResponse.redirect(url);
+  } else {
+    if (userIsAdmin) {
+      const url = req.nextUrl.clone();
+      url.pathname = ADMIN_PREFIX;
+      return NextResponse.redirect(url);
+    }
+    return NextResponse.next();
   }
 }
 
