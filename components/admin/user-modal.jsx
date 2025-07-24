@@ -27,7 +27,7 @@ const userSchema = z.object({
 export default function UserModal({ isOpen, onClose, user }) {
     const [loading, setLoading] = useState(false)
     const [formData, setFormData] = useState({
-        role: "user",
+        role: "author",
         is_verified: false,
         points: 0
     })
@@ -39,14 +39,13 @@ export default function UserModal({ isOpen, onClose, user }) {
         reset,
         formState: { errors },
         setValue,
-        watch
     } = useForm({
         resolver: zodResolver(userSchema),
         defaultValues: {
             email: "",
             username: "",
             full_name: "",
-            role: "user",
+            role: "author",
             is_verified: false,
             points: 0,
         },
@@ -58,7 +57,7 @@ export default function UserModal({ isOpen, onClose, user }) {
                 email: user.email || "",
                 username: user.username || "",
                 full_name: user.full_name || "",
-                role: user.role || "user",
+                role: user.role || "author",
                 is_verified: user.is_verified || false,
                 points: user.points || 0,
             }
@@ -73,13 +72,13 @@ export default function UserModal({ isOpen, onClose, user }) {
                 email: "",
                 username: "",
                 full_name: "",
-                role: "user",
+                role: "author",
                 is_verified: false,
                 points: 0,
             }
             reset(defaultData)
             setFormData({
-                role: "user",
+                role: "author",
                 is_verified: false,
                 points: 0
             })
@@ -106,41 +105,25 @@ export default function UserModal({ isOpen, onClose, user }) {
     }
 
     const modalVariants = {
-        hidden: {
-            opacity: 0,
-            scale: 0.8,
-            y: 50
-        },
+        hidden: { opacity: 0, scale: 0.95, y: 20 },
         visible: {
             opacity: 1,
             scale: 1,
             y: 0,
-            transition: {
-                duration: 0.4,
-                ease: "easeOut"
-            }
+            transition: { duration: 0.3, ease: "easeOut" }
         },
         exit: {
             opacity: 0,
-            scale: 0.8,
-            y: 50,
-            transition: {
-                duration: 0.3,
-                ease: "easeIn"
-            }
+            scale: 0.95,
+            y: 20,
+            transition: { duration: 0.2, ease: "easeIn" }
         }
     }
 
     const overlayVariants = {
         hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: { duration: 0.3 }
-        },
-        exit: {
-            opacity: 0,
-            transition: { duration: 0.2 }
-        }
+        visible: { opacity: 1, transition: { duration: 0.2 } },
+        exit: { opacity: 0, transition: { duration: 0.2 } }
     }
 
     return (
@@ -152,7 +135,7 @@ export default function UserModal({ isOpen, onClose, user }) {
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+                        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
                     />
                     <DialogContent className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 max-w-md w-full p-0 border-0 bg-transparent">
                         <motion.div
@@ -160,291 +143,189 @@ export default function UserModal({ isOpen, onClose, user }) {
                             initial="hidden"
                             animate="visible"
                             exit="exit"
-                            className="relative"
+                            className="bg-gray-900/95 backdrop-blur-xl border border-gray-800/50 rounded-2xl overflow-hidden shadow-2xl"
                         >
-                            {/* Background Effects */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-gray-900/90 to-cyan-900/20 rounded-2xl"></div>
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl"></div>
-                            <div className="absolute bottom-0 left-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl"></div>
+                            <DialogHeader className="p-6 border-b border-gray-800/50">
+                                <DialogTitle className="flex items-center space-x-3 text-xl font-semibold text-white">
+                                    <div className="p-2 bg-blue-500/20 rounded-lg">
+                                        <User className="h-5 w-5 text-blue-400" />
+                                    </div>
+                                    <span>{isEdit ? "Edit User" : "Create New User"}</span>
+                                </DialogTitle>
+                                <p className="text-sm text-gray-400 mt-2">
+                                    {isEdit ? "Update user information and settings" : "Add a new user to the system"}
+                                </p>
+                            </DialogHeader>
 
-                            <div className="relative bg-gray-900/95 backdrop-blur-xl border border-gray-700/50 rounded-2xl overflow-hidden">
-                                {/* Header */}
-                                <motion.div
-                                    initial={{ opacity: 0, y: -20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.1, duration: 0.5 }}
-                                    className="relative p-6 border-b border-gray-700/50"
-                                >
-                                    <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-cyan-500/10"></div>
-                                    <DialogHeader className="relative">
-                                        <DialogTitle className="flex items-center space-x-3 text-xl font-bold">
-                                            <motion.div
-                                                animate={{ rotate: [0, 360] }}
-                                                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                                                className="relative"
-                                            >
-                                                <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-cyan-500 rounded-full blur opacity-50"></div>
-                                                <User className="relative h-6 w-6 text-purple-400" />
-                                            </motion.div>
-                                            <span className="bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
-                                                {isEdit ? "Edit User" : "Create New User"}
-                                            </span>
-                                            <motion.div
-                                                animate={{ scale: [1, 1.2, 1] }}
-                                                transition={{ duration: 2, repeat: Infinity }}
-                                            >
-                                                <Sparkles className="h-5 w-5 text-cyan-400" />
-                                            </motion.div>
-                                        </DialogTitle>
-                                        <div className="flex items-center space-x-2 mt-2">
-                                            <Shield className="h-4 w-4 text-purple-400" />
-                                            <span className="text-sm text-purple-300">User Management Panel</span>
-                                        </div>
-                                    </DialogHeader>
-                                </motion.div>
-
-                                {/* Form */}
-                                <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
-                                    {/* Email Field */}
-                                    <motion.div
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: 0.2, duration: 0.5 }}
-                                        className="space-y-2"
-                                    >
-                                        <Label className="text-gray-300 font-medium flex items-center space-x-2">
-                                            <Mail className="h-4 w-4 text-purple-400" />
-                                            <span>Email Address</span>
-                                        </Label>
-                                        <div className="relative group">
-                                            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-cyan-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                                            <Input
-                                                type="email"
-                                                {...register("email")}
-                                                className="relative bg-gray-800/80 backdrop-blur border-gray-600/50 text-white placeholder-gray-400 focus:border-purple-500/50 focus:ring-purple-500/25 rounded-xl transition-all duration-300"
-                                                placeholder="Enter email address"
-                                            />
-                                        </div>
-                                        {errors.email && (
-                                            <motion.p
-                                                initial={{ opacity: 0, y: -10 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                className="flex items-center space-x-1 text-red-400 text-sm"
-                                            >
-                                                <AlertCircle className="h-3 w-3" />
-                                                <span>{errors.email.message}</span>
-                                            </motion.p>
-                                        )}
-                                    </motion.div>
-
-                                    {/* Username Field */}
-                                    <motion.div
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: 0.3, duration: 0.5 }}
-                                        className="space-y-2"
-                                    >
-                                        <Label className="text-gray-300 font-medium flex items-center space-x-2">
-                                            <User className="h-4 w-4 text-cyan-400" />
-                                            <span>Username</span>
-                                        </Label>
-                                        <div className="relative group">
-                                            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                                            <Input
-                                                {...register("username")}
-                                                className="relative bg-gray-800/80 backdrop-blur border-gray-600/50 text-white placeholder-gray-400 focus:border-cyan-500/50 focus:ring-cyan-500/25 rounded-xl transition-all duration-300"
-                                                placeholder="Enter username"
-                                            />
-                                        </div>
-                                        {errors.username && (
-                                            <motion.p
-                                                initial={{ opacity: 0, y: -10 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                className="flex items-center space-x-1 text-red-400 text-sm"
-                                            >
-                                                <AlertCircle className="h-3 w-3" />
-                                                <span>{errors.username.message}</span>
-                                            </motion.p>
-                                        )}
-                                    </motion.div>
-
-                                    {/* Full Name Field */}
-                                    <motion.div
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: 0.4, duration: 0.5 }}
-                                        className="space-y-2"
-                                    >
-                                        <Label className="text-gray-300 font-medium flex items-center space-x-2">
-                                            <User className="h-4 w-4 text-emerald-400" />
-                                            <span>Full Name</span>
-                                        </Label>
-                                        <div className="relative group">
-                                            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                                            <Input
-                                                {...register("full_name")}
-                                                className="relative bg-gray-800/80 backdrop-blur border-gray-600/50 text-white placeholder-gray-400 focus:border-emerald-500/50 focus:ring-emerald-500/25 rounded-xl transition-all duration-300"
-                                                placeholder="Enter full name"
-                                            />
-                                        </div>
-                                        {errors.full_name && (
-                                            <motion.p
-                                                initial={{ opacity: 0, y: -10 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                className="flex items-center space-x-1 text-red-400 text-sm"
-                                            >
-                                                <AlertCircle className="h-3 w-3" />
-                                                <span>{errors.full_name.message}</span>
-                                            </motion.p>
-                                        )}
-                                    </motion.div>
-
-                                    {/* Role & Verification Row */}
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: 0.5, duration: 0.5 }}
-                                        className="grid grid-cols-2 gap-4"
-                                    >
-                                        {/* Role Field */}
-                                        <div className="space-y-2">
-                                            <Label className="text-gray-300 font-medium flex items-center space-x-2">
-                                                <Crown className="h-4 w-4 text-orange-400" />
-                                                <span>Role</span>
-                                            </Label>
-                                            <div className="relative group">
-                                                <div className="absolute inset-0 bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                                                <Select
-                                                    value={formData.role}
-                                                    onValueChange={(value) => {
-                                                        setFormData(prev => ({ ...prev, role: value }))
-                                                        setValue("role", value)
-                                                    }}
-                                                >
-                                                    <SelectTrigger className="relative bg-gray-800/80 backdrop-blur border-gray-600/50 text-white focus:border-orange-500/50 focus:ring-orange-500/25 rounded-xl">
-                                                        <SelectValue placeholder="Select role" />
-                                                    </SelectTrigger>
-                                                    <SelectContent className="bg-gray-800 border-gray-600 text-white">
-                                                        <SelectItem value="user" className="focus:bg-gray-700">
-                                                            <div className="flex items-center space-x-2">
-                                                                <User className="h-4 w-4" />
-                                                                <span>User</span>
-                                                            </div>
-                                                        </SelectItem>
-                                                        <SelectItem value="admin" className="focus:bg-gray-700">
-                                                            <div className="flex items-center space-x-2">
-                                                                <Crown className="h-4 w-4 text-orange-400" />
-                                                                <span>Admin</span>
-                                                            </div>
-                                                        </SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                        </div>
-
-                                        {/* Points Field */}
-                                        <div className="space-y-2">
-                                            <Label className="text-gray-300 font-medium flex items-center space-x-2">
-                                                <Sparkles className="h-4 w-4 text-yellow-400" />
-                                                <span>Points</span>
-                                            </Label>
-                                            <div className="relative group">
-                                                <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                                                <Input
-                                                    type="number"
-                                                    min="0"
-                                                    value={formData.points}
-                                                    onChange={(e) => {
-                                                        const value = parseInt(e.target.value) || 0
-                                                        setFormData(prev => ({ ...prev, points: value }))
-                                                        setValue("points", value)
-                                                    }}
-                                                    className="relative bg-gray-800/80 backdrop-blur border-gray-600/50 text-white placeholder-gray-400 focus:border-yellow-500/50 focus:ring-yellow-500/25 rounded-xl transition-all duration-300"
-                                                    placeholder="0"
-                                                />
-                                            </div>
-                                        </div>
-                                    </motion.div>
-
-                                    {/* Verification Switch */}
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: 0.6, duration: 0.5 }}
-                                        className="space-y-3"
-                                    >
-                                        <div className="flex items-center justify-between p-4 bg-gray-800/50 backdrop-blur rounded-xl border border-gray-600/50 group hover:border-gray-500/50 transition-all duration-300">
-                                            <div className="flex items-center space-x-3">
-                                                <motion.div
-                                                    animate={formData.is_verified ? { scale: [1, 1.2, 1] } : { scale: 1 }}
-                                                    transition={{ duration: 0.5 }}
-                                                >
-                                                    <Shield className={`h-5 w-5 ${formData.is_verified ? 'text-emerald-400' : 'text-gray-500'} transition-colors duration-300`} />
-                                                </motion.div>
-                                                <div>
-                                                    <Label className="text-gray-300 font-medium">Email Verification</Label>
-                                                    <p className="text-sm text-gray-400">Mark user as verified</p>
-                                                </div>
-                                            </div>
-                                            <Switch
-                                                checked={formData.is_verified}
-                                                onCheckedChange={(checked) => {
-                                                    setFormData(prev => ({ ...prev, is_verified: checked }))
-                                                    setValue("is_verified", checked)
-                                                }}
-                                                className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-emerald-500 data-[state=checked]:to-teal-500"
-                                            />
-                                        </div>
-                                    </motion.div>
-
-                                    {/* Action Buttons */}
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: 0.7, duration: 0.5 }}
-                                        className="flex justify-end space-x-3 pt-4 border-t border-gray-700/50"
-                                    >
+                            <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
+                                <div className="space-y-2">
+                                    <Label className="text-sm font-medium text-gray-300 flex items-center space-x-2">
+                                        <Mail className="h-4 w-4 text-blue-400" />
+                                        <span>Email Address</span>
+                                    </Label>
+                                    <Input
+                                        type="email"
+                                        {...register("email")}
+                                        className="bg-gray-800/50 border-gray-700/50 text-white placeholder-gray-400 focus:border-blue-500/50 focus:ring-blue-500/25 rounded-lg transition-colors"
+                                        placeholder="Enter email address"
+                                    />
+                                    {errors.email && (
                                         <motion.div
-                                            whileHover={{ scale: 1.05 }}
-                                            whileTap={{ scale: 0.95 }}
+                                            initial={{ opacity: 0, y: -10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            className="flex items-center space-x-1 text-red-400 text-sm"
                                         >
-                                            <Button
-                                                type="button"
-                                                onClick={onClose}
-                                                className="group bg-gray-700/80 backdrop-blur border border-gray-600/50 text-gray-300 hover:bg-gray-600/80 hover:text-white rounded-xl transition-all duration-300"
-                                            >
-                                                <motion.div
-                                                    whileHover={{ rotate: 90 }}
-                                                    transition={{ duration: 0.2 }}
-                                                >
-                                                    <X className="w-4 h-4 mr-2" />
-                                                </motion.div>
-                                                Cancel
-                                            </Button>
+                                            <AlertCircle className="h-3 w-3" />
+                                            <span>{errors.email.message}</span>
                                         </motion.div>
+                                    )}
+                                </div>
 
+                                <div className="space-y-2">
+                                    <Label className="text-sm font-medium text-gray-300 flex items-center space-x-2">
+                                        <User className="h-4 w-4 text-emerald-400" />
+                                        <span>Username</span>
+                                    </Label>
+                                    <Input
+                                        {...register("username")}
+                                        className="bg-gray-800/50 border-gray-700/50 text-white placeholder-gray-400 focus:border-emerald-500/50 focus:ring-emerald-500/25 rounded-lg transition-colors"
+                                        placeholder="Enter username"
+                                    />
+                                    {errors.username && (
                                         <motion.div
-                                            whileHover={{ scale: 1.05 }}
-                                            whileTap={{ scale: 0.95 }}
+                                            initial={{ opacity: 0, y: -10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            className="flex items-center space-x-1 text-red-400 text-sm"
                                         >
-                                            <Button
-                                                type="submit"
-                                                disabled={loading}
-                                                className="group relative overflow-hidden bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 border-0 text-white shadow-lg shadow-purple-500/25 rounded-xl transition-all duration-300"
-                                            >
-                                                <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-cyan-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                                                <motion.div
-                                                    animate={loading ? { rotate: 360 } : { rotate: 0 }}
-                                                    transition={loading ? { duration: 1, repeat: Infinity, ease: "linear" } : {}}
-                                                >
-                                                    <Save className="w-4 h-4 mr-2" />
-                                                </motion.div>
-                                                {loading ? "Saving..." : isEdit ? "Update User" : "Create User"}
-                                            </Button>
+                                            <AlertCircle className="h-3 w-3" />
+                                            <span>{errors.username.message}</span>
                                         </motion.div>
-                                    </motion.div>
-                                </form>
-                            </div>
+                                    )}
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label className="text-sm font-medium text-gray-300 flex items-center space-x-2">
+                                        <User className="h-4 w-4 text-purple-400" />
+                                        <span>Full Name</span>
+                                    </Label>
+                                    <Input
+                                        {...register("full_name")}
+                                        className="bg-gray-800/50 border-gray-700/50 text-white placeholder-gray-400 focus:border-purple-500/50 focus:ring-purple-500/25 rounded-lg transition-colors"
+                                        placeholder="Enter full name"
+                                    />
+                                    {errors.full_name && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: -10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            className="flex items-center space-x-1 text-red-400 text-sm"
+                                        >
+                                            <AlertCircle className="h-3 w-3" />
+                                            <span>{errors.full_name.message}</span>
+                                        </motion.div>
+                                    )}
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-medium text-gray-300 flex items-center space-x-2">
+                                            <Crown className="h-4 w-4 text-orange-400" />
+                                            <span>Role</span>
+                                        </Label>
+                                        <Select
+                                            value={formData.role}
+                                            onValueChange={(value) => {
+                                                setFormData(prev => ({ ...prev, role: value }))
+                                                setValue("role", value)
+                                            }}
+                                        >
+                                            <SelectTrigger className="bg-gray-800/50 border-gray-700/50 text-white focus:border-orange-500/50 focus:ring-orange-500/25 rounded-lg">
+                                                <SelectValue placeholder="Select role" />
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-gray-800 border-gray-700 text-white rounded-lg">
+                                                <SelectItem value="author" className="focus:bg-gray-700 rounded-md">
+                                                    <div className="flex items-center space-x-2">
+                                                        <User className="h-4 w-4" />
+                                                        <span>Author</span>
+                                                    </div>
+                                                </SelectItem>
+                                                <SelectItem value="admin" className="focus:bg-gray-700 rounded-md">
+                                                    <div className="flex items-center space-x-2">
+                                                        <Crown className="h-4 w-4 text-orange-400" />
+                                                        <span>Admin</span>
+                                                    </div>
+                                                </SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-medium text-gray-300 flex items-center space-x-2">
+                                            <Sparkles className="h-4 w-4 text-yellow-400" />
+                                            <span>Points</span>
+                                        </Label>
+                                        <Input
+                                            type="number"
+                                            min="0"
+                                            value={formData.points}
+                                            onChange={(e) => {
+                                                const value = parseInt(e.target.value) || 0
+                                                setFormData(prev => ({ ...prev, points: value }))
+                                                setValue("points", value)
+                                            }}
+                                            className="bg-gray-800/50 border-gray-700/50 text-white placeholder-gray-400 focus:border-yellow-500/50 focus:ring-yellow-500/25 rounded-lg transition-colors"
+                                            placeholder="0"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-between p-4 bg-gray-800/30 border border-gray-700/50 rounded-lg">
+                                    <div className="flex items-center space-x-3">
+                                        <div className="p-2 bg-emerald-500/20 rounded-lg">
+                                            <Shield className="h-4 w-4 text-emerald-400" />
+                                        </div>
+                                        <div>
+                                            <Label className="text-sm font-medium text-white">Email Verification</Label>
+                                            <p className="text-xs text-gray-400">Mark user as verified</p>
+                                        </div>
+                                    </div>
+                                    <Switch
+                                        checked={formData.is_verified}
+                                        onCheckedChange={(checked) => {
+                                            setFormData(prev => ({ ...prev, is_verified: checked }))
+                                            setValue("is_verified", checked)
+                                        }}
+                                        className="data-[state=checked]:bg-emerald-500"
+                                    />
+                                </div>
+
+                                <div className="flex justify-end space-x-3 pt-4 border-t border-gray-800/50">
+                                    <Button
+                                        type="button"
+                                        onClick={onClose}
+                                        variant="outline"
+                                        className="bg-gray-800/50 border-gray-700/50 text-gray-300 hover:bg-gray-700/50 hover:text-white rounded-lg transition-colors"
+                                    >
+                                        <X className="w-4 h-4 mr-2" />
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        type="submit"
+                                        disabled={loading}
+                                        className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg shadow-blue-500/25 rounded-lg transition-all duration-200"
+                                    >
+                                        {loading ? (
+                                            <motion.div
+                                                animate={{ rotate: 360 }}
+                                                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                                                className="w-4 h-4 mr-2 border-2 border-white/30 border-t-white rounded-full"
+                                            />
+                                        ) : (
+                                            <Save className="w-4 h-4 mr-2" />
+                                        )}
+                                        {loading ? "Saving..." : isEdit ? "Update User" : "Create User"}
+                                    </Button>
+                                </div>
+                            </form>
                         </motion.div>
                     </DialogContent>
                 </Dialog>

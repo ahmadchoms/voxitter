@@ -2,16 +2,57 @@
 
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart3 } from "lucide-react";
+import { BarChart3, TrendingUp, LineChart, PieChart as PieChartIcon } from "lucide-react";
+import {
+    LineChart as RechartsLineChart,
+    Line,
+    BarChart,
+    Bar,
+    PieChart,
+    Pie,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    Legend,
+    Cell,
+    ResponsiveContainer,
+} from "recharts";
 
-export default function StatsChart({ title, subtitle, data, gradient, accentColor }) {
-    // Validate data prop
+const colorVariants = {
+    blue: {
+        gradient: "from-blue-500 to-blue-600",
+        light: "from-blue-400 to-blue-500",
+        bg: "bg-blue-950/20",
+        text: "text-blue-400",
+        chartColor: "#60A5FA",
+        pieColors: ["#60A5FA", "#3B82F6", "#2563EB", "#1D4ED8"],
+    },
+    emerald: {
+        gradient: "from-emerald-500 to-emerald-600",
+        light: "from-emerald-400 to-emerald-500",
+        bg: "bg-emerald-950/20",
+        text: "text-emerald-400",
+        chartColor: "#34D399",
+        pieColors: ["#34D399", "#10B981", "#059669", "#047857"],
+    },
+    purple: {
+        gradient: "from-purple-500 to-purple-600",
+        light: "from-purple-400 to-purple-500",
+        bg: "bg-purple-950/20",
+        text: "text-purple-400",
+        chartColor: "#A78BFA",
+        pieColors: ["#A78BFA", "#8B5CF6", "#7C3AED", "#6D28D9"],
+    },
+};
+
+export default function StatsChart({ title, subtitle, data, color = "blue", chartType = "line" }) {
     if (!data || !Array.isArray(data) || data.length === 0) {
         return (
-            <Card className="bg-gradient-to-br from-gray-900/90 via-gray-900/60 to-gray-800/90 border border-gray-700/50 backdrop-blur-xl shadow-2xl">
+            <Card className="bg-gray-900/70 border border-gray-800/50 backdrop-blur-sm">
                 <CardHeader>
-                    <CardTitle className="text-xl font-bold text-white">{title}</CardTitle>
-                    <p className="text-sm text-gray-400 font-light">{subtitle}</p>
+                    <CardTitle className="text-lg font-semibold text-white">{title}</CardTitle>
+                    <p className="text-sm text-gray-400">{subtitle}</p>
                 </CardHeader>
                 <CardContent>
                     <p className="text-sm text-gray-400">No data available</p>
@@ -20,91 +61,133 @@ export default function StatsChart({ title, subtitle, data, gradient, accentColo
         );
     }
 
-    const maxValue = Math.max(...data.map((item) => item.value), 1); // Avoid division by zero
+    const colors = colorVariants[color];
+    const Icon = chartType === "line" ? LineChart : chartType === "bar" ? BarChart3 : PieChartIcon;
+
+    const renderChart = () => {
+        switch (chartType) {
+            case "line":
+                return (
+                    <ResponsiveContainer width="100%" height={200}>
+                        <RechartsLineChart data={data}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                            <XAxis dataKey="month" stroke="#9CA3AF" />
+                            <YAxis stroke="#9CA3AF" />
+                            <Tooltip
+                                contentStyle={{
+                                    backgroundColor: "#1F2937",
+                                    border: "1px solid #4B5563",
+                                    borderRadius: "0.5rem",
+                                }}
+                                itemStyle={{ color: "#E5E7EB" }}
+                                labelStyle={{ color: "#9CA3AF" }}
+                            />
+                            <Legend wrapperStyle={{ color: "#9CA3AF" }} />
+                            <Line
+                                type="monotone"
+                                dataKey="value"
+                                stroke={colors.chartColor}
+                                strokeWidth={2}
+                                dot={{ r: 4, fill: colors.chartColor, strokeWidth: 1 }}
+                                activeDot={{ r: 6, fill: colors.chartColor, stroke: "#E5E7EB", strokeWidth: 2 }}
+                            />
+                        </RechartsLineChart>
+                    </ResponsiveContainer>
+                );
+            case "bar":
+                return (
+                    <ResponsiveContainer width="100%" height={200}>
+                        <BarChart data={data}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                            <XAxis dataKey="month" stroke="#9CA3AF" />
+                            <YAxis stroke="#9CA3AF" />
+                            <Tooltip
+                                contentStyle={{
+                                    backgroundColor: "#1F2937",
+                                    border: "1px solid #4B5563",
+                                    borderRadius: "0.5rem",
+                                }}
+                                itemStyle={{ color: "#E5E7EB" }}
+                                labelStyle={{ color: "#9CA3AF" }}
+                            />
+                            <Legend wrapperStyle={{ color: "#9CA3AF" }} />
+                            <Bar dataKey="value" fill={colors.chartColor} radius={[4, 4, 0, 0]} />
+                        </BarChart>
+                    </ResponsiveContainer>
+                );
+            case "pie":
+                return (
+                    <ResponsiveContainer width="100%" height={200}>
+                        <PieChart>
+                            <Pie
+                                data={data}
+                                dataKey="value"
+                                nameKey="month"
+                                cx="50%"
+                                cy="50%"
+                                outerRadius={80}
+                                fill="#8884d8"
+                                labelLine={false}
+                                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                            >
+                                {data.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={colors.pieColors[index % colors.pieColors.length]} />
+                                ))}
+                            </Pie>
+                            <Tooltip
+                                contentStyle={{
+                                    backgroundColor: "#1F2937",
+                                    border: "1px solid #4B5563",
+                                    borderRadius: "0.5rem",
+                                }}
+                                itemStyle={{ color: "#E5E7EB" }}
+                                labelStyle={{ color: "#9CA3AF" }}
+                            />
+                            <Legend wrapperStyle={{ color: "#9CA3AF" }} />
+                        </PieChart>
+                    </ResponsiveContainer>
+                );
+            default:
+                return null;
+        }
+    };
 
     return (
         <motion.div
-            initial={{ opacity: 0, y: 40, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-            whileHover={{ scale: 1.02, y: -4 }}
-            className="group relative"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            whileHover={{ y: -2 }}
+            className="group"
         >
-            <Card className="relative bg-gradient-to-br from-gray-900/90 via-gray-900/60 to-gray-800/90 border border-gray-700/50 backdrop-blur-xl shadow-2xl hover:shadow-purple-500/10 transition-all duration-500 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-900/5 via-transparent to-cyan-900/5"></div>
-                <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}></div>
-
-                <CardHeader className="relative">
+            <Card className="bg-gray-900/70 border border-gray-800/50 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
+                <CardHeader className="pb-4">
                     <div className="flex items-center justify-between">
                         <div>
-                            <CardTitle className="text-xl font-bold text-white mb-1 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-cyan-400 transition-all duration-300">
-                                {title}
-                            </CardTitle>
-                            <p className="text-sm text-gray-400 font-light">{subtitle}</p>
+                            <CardTitle className="text-lg font-semibold text-white mb-1">{title}</CardTitle>
+                            <p className="text-sm text-gray-400">{subtitle}</p>
                         </div>
-                        <motion.div
-                            whileHover={{ rotate: 360, scale: 1.2 }}
-                            transition={{ duration: 0.6 }}
-                            className="relative"
-                        >
-                            <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-cyan-500 rounded-full blur opacity-50"></div>
-                            <BarChart3 className="relative h-6 w-6 text-purple-400 group-hover:text-cyan-400 transition-colors duration-300" />
-                        </motion.div>
+                        <div className={`p-2 rounded-lg bg-gradient-to-br ${colors.gradient}`}>
+                            <Icon className="h-5 w-5 text-white" />
+                        </div>
                     </div>
                 </CardHeader>
 
-                <CardContent className="relative">
-                    <div className="flex items-end justify-between space-x-3 h-48 mb-4" role="region" aria-label={`${title} bar chart`}>
-                        {data.map((item, index) => (
-                            <div key={item.month} className="flex-1 flex flex-col items-center group/bar" role="group" aria-label={`Data for ${item.month}`}>
-                                <motion.div
-                                    initial={{ height: 0, opacity: 0 }}
-                                    animate={{ height: `${(item.value / maxValue) * 100}%`, opacity: 1 }}
-                                    transition={{
-                                        delay: index * 0.1,
-                                        duration: 0.8,
-                                        ease: "easeOut",
-                                    }}
-                                    whileHover={{ scaleY: 1.05 }}
-                                    className="w-full rounded-t-lg relative overflow-hidden cursor-pointer"
-                                    style={{ minHeight: "20px" }}
-                                    role="img"
-                                    aria-label={`Bar for ${item.month} with value ${item.value.toLocaleString()}`}
-                                >
-                                    <div className={`w-full h-full bg-gradient-to-t ${gradient} relative`} />
-                                    <div
-                                        className={`absolute inset-0 bg-gradient-to-t ${gradient} opacity-0 group-hover/bar:opacity-50 blur-sm transition-opacity duration-300`}
-                                    />
-                                    <motion.div
-                                        initial={{ x: "-100%" }}
-                                        animate={{ x: "100%" }}
-                                        transition={{
-                                            duration: 2,
-                                            repeat: Infinity,
-                                            repeatDelay: 3,
-                                            ease: "easeInOut",
-                                        }}
-                                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
-                                    />
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 10 }}
-                                        whileHover={{ opacity: 1, y: -10 }}
-                                        transition={{ duration: 0.3 }}
-                                        className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded shadow-lg"
-                                    >
-                                        {item.value.toLocaleString()}
-                                    </motion.div>
-                                </motion.div>
-                                <motion.span
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    transition={{ delay: index * 0.1 + 0.5 }}
-                                    className="text-xs text-gray-400 mt-3 font-medium group-hover/bar:text-white transition-colors duration-300"
-                                >
-                                    {item.month}
-                                </motion.span>
+                <CardContent>
+                    {renderChart()}
+                    <div className={`p-3 rounded-lg ${colors.bg} border border-gray-700/30 mt-6`}>
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                                <TrendingUp className={`h-4 w-4 ${colors.text}`} />
+                                <span className="text-sm font-medium text-white">Trend Analysis</span>
                             </div>
-                        ))}
+                            <div className="text-right">
+                                <div className="text-sm font-semibold text-white">
+                                    {data.length >= 2 ? ((data[data.length - 1]?.value / data[0]?.value - 1) * 100).toFixed(1) : "N/A"}%
+                                </div>
+                                <div className="text-xs text-gray-400">Growth rate</div>
+                            </div>
+                        </div>
                     </div>
                 </CardContent>
             </Card>

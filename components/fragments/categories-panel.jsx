@@ -51,14 +51,11 @@ export default function CategoryPanel() {
 
     const totalPosts = categories.reduce((sum, category) => sum + category.post_count, 0);
 
-    const handleRateTopic = async (topicId, newRating) => {
-        const { success, error } = await rateTopic(topicId, newRating);
+    const handleRate = async (rating) => {
+        const { error } = await rateTopic(topic.id, rating);
 
-        if (success) {
-            toast.success("Rating submitted successfully!");
-        } else {
-            toast.error("Failed to submit rating" + (error ? `: ${error}` : ""));
-        }
+        if (error) return toast.error(error.message);
+        toast.success("Rating berhasil disimpan!");
     };
 
     return (
@@ -110,9 +107,9 @@ export default function CategoryPanel() {
                                         </Badge>
                                         <div className="flex items-center gap-1 mt-3 ml-2">
                                             <StarRating
-                                                rating={parseFloat(topic.average_rating)}
+                                                rating={topic.user_rating || 0}
                                                 userRating={topic.userRating}
-                                                onRate={(newRating) => handleRateTopic(topic.id, newRating)}
+                                                onRate={handleRate}
                                                 size={14}
                                                 disabled={!session}
                                             />
